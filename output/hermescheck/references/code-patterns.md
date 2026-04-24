@@ -8,7 +8,7 @@ Each section lists the regex patterns used by that scanner.
 ## Usage
 
 ```bash
-python -m pip install "git+https://github.com/huangrichao2020/hermescheck.git"
+pip install hermescheck
 hermescheck /path/to/your/agent/project
 ```
 

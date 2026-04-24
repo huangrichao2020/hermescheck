@@ -79,7 +79,7 @@ Each section lists the regex patterns used by that scanner.
 ## Usage
 
 ```bash
-python -m pip install "git+https://github.com/huangrichao2020/hermescheck.git"
+pip install hermescheck
 hermescheck /path/to/your/agent/project
 ```
 
@@ -119,7 +119,7 @@ Hermes Agent has a connected runtime: agent loop, command registry, CLI, TUI, ga
 ## Quick Start
 
 ```bash
-python -m pip install "git+https://github.com/huangrichao2020/hermescheck.git"
+pip install hermescheck
 hermescheck /path/to/hermes-agent
 ```
 

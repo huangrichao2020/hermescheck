@@ -16,6 +16,7 @@ Hermes-specific review workflows.
 
 <p align="center">
   <a href="https://github.com/huangrichao2020/hermescheck/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/huangrichao2020/hermescheck/ci.yml?branch=main&label=CI&style=flat-square"></a>
+  <a href="https://pypi.org/project/hermescheck/"><img alt="PyPI" src="https://img.shields.io/pypi/v/hermescheck?style=flat-square"></a>
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/github/license/huangrichao2020/hermescheck?style=flat-square"></a>
   <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
   <a href="#contributors"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square"></a>
@@ -42,10 +43,8 @@ ways ordinary linters do not catch.
 
 ## Quick Start
 
-Until the first PyPI release, install from GitHub:
-
 ```bash
-python -m pip install "git+https://github.com/huangrichao2020/hermescheck.git"
+pip install hermescheck
 ```
 
 Scan a Hermes Agent checkout:
