@@ -112,3 +112,36 @@ def test_os_architecture_accepts_stateful_recovery_contract(tmp_path: Path) -> N
     )
 
     assert scan_os_architecture(tmp_path) == []
+
+
+def test_os_architecture_flags_incomplete_llm_cli_worker_contract(tmp_path: Path) -> None:
+    (tmp_path / "delegation.md").write_text(
+        "\n".join(
+            [
+                "The master agent can spawn qwen as an external LLM CLI worker.",
+                "It also shells out to codex command workers for code edits.",
+                "The design does not define a structured input file or process lifecycle controls.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_os_architecture(tmp_path)
+
+    assert "LLM CLI worker contract incomplete" in _titles(findings)
+
+
+def test_os_architecture_accepts_llm_cli_worker_contract(tmp_path: Path) -> None:
+    (tmp_path / "delegation.md").write_text(
+        "\n".join(
+            [
+                "The master agent owns a CLI process pool for external LLM CLI workers: qwen, codex, and claude.",
+                "Each worker receives a Task JSON task envelope with context, files, and acceptance criteria.",
+                "The supervisor captures stdout, stderr, exit code, returncode, and process output.",
+                "Worker pool execution uses timeout, concurrency, cancellation, and queue controls.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    assert scan_os_architecture(tmp_path) == []

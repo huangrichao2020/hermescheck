@@ -163,7 +163,8 @@
               "os_scheduler",
               "os_syscall",
               "os_vfs",
-              "stateful_recovery"
+              "stateful_recovery",
+              "llm_cli_workers"
             ]
           },
           "minItems": 1

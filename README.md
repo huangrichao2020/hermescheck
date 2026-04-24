@@ -71,6 +71,7 @@ The architecture should provide these capabilities:
 
 - one canonical command surface across CLI, TUI, gateway, help, autocomplete, and menus
 - stateful recovery from transcript plus real environment state
+- external LLM CLI workers through Task JSON, stdout/stderr/exit-code capture, and process controls
 - explicit tool/syscall capabilities before high-agency execution
 - memory that supports facts, skills, semantic anchors, paging, and page-fault recovery
 - scheduler controls for long-running jobs, cron, gateway events, and user-visible tasks
@@ -199,6 +200,7 @@ The Hermes-specific scanner runs alongside inherited architecture checks:
 - impression/pointer memory gaps
 - role-play handoff chains
 - agent-OS architecture gaps, including Stateful Agent recovery
+- LLM CLI worker contract gaps for Qwen/Codex/Claude-style process delegation
 - duplicated skills and SOPs
 - startup and runtime surface sprawl
 - hidden LLM calls

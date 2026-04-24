@@ -100,6 +100,19 @@ SIGNAL_PATTERNS = {
         r"(?:环境即状态|环境状态|现场|服务器文件|硬盘|物理生效|副作用记录|动作日志|操作日志)",
         re.IGNORECASE,
     ),
+    "llm_cli_workers": re.compile(
+        r"\b(?:llm cli|cli agent|external llm|external code tool|coding agent cli|qwen[-_ ]?code|"
+        r"qwen|codex|claude|gemini|opencode|process pool|worker pool)\b.{0,80}"
+        r"\b(?:cli|command|subprocess|worker|spawn|process|pool)\b|"
+        r"(?:外部\s*LLM|代码\s*CLI|CLI\s*进程池|命令行\s*worker|拉起\s*qwen|拉起\s*codex|拉起\s*claude)",
+        re.IGNORECASE,
+    ),
+    "task_envelope": re.compile(
+        r"\b(?:task json|task file|task envelope|work order|handoff file|job spec|delegation spec|"
+        r"stdout|stderr|exit code|returncode|capture_output|process output)\b|"
+        r"(?:任务\s*JSON|任务文件|任务信封|工作单|标准输出|退出码|捕获输出)",
+        re.IGNORECASE,
+    ),
 }
 
 SIGNAL_POINTS = {
@@ -120,6 +133,8 @@ SIGNAL_POINTS = {
     "observability": 7,
     "stateful_recovery": 10,
     "environment_state": 8,
+    "llm_cli_workers": 8,
+    "task_envelope": 7,
 }
 
 SIGNAL_LABELS = {
@@ -140,6 +155,8 @@ SIGNAL_LABELS = {
     "observability": "traces/evals",
     "stateful_recovery": "stateful recovery",
     "environment_state": "environment-as-state",
+    "llm_cli_workers": "LLM CLI workers",
+    "task_envelope": "task envelope",
 }
 
 MILESTONES = {
@@ -153,6 +170,8 @@ MILESTONES = {
     "observability": "保留 traces/evals，让 agent 的进化可以被复盘和比较。",
     "stateful_recovery": "把自动续接做成 Stateful Agent 契约：context replay + environment state + side-effect log + idempotent recovery。",
     "environment_state": "把 filesystem/server/workspace 状态纳入可验证状态模型，恢复时先读取现场再决定下一步。",
+    "llm_cli_workers": "把 Qwen/Codex/Claude 等外部 CLI 当作 bounded worker process，而不是临时 shell 魔法。",
+    "task_envelope": "用 Task JSON + stdout/stderr/exit code + timeout/concurrency 控制定义 CLI worker 的输入输出契约。",
 }
 
 FINDING_PENALTIES = {
@@ -163,6 +182,7 @@ FINDING_PENALTIES = {
     "Tool syscalls lack explicit capability table": 8,
     "Knowledge surfaces lack semantic VFS": 7,
     "Stateful Agent recovery contract incomplete": 8,
+    "LLM CLI worker contract incomplete": 7,
     "Internal orchestration sprawl detected": 6,
     "Memory freshness / generation confusion detected": 6,
     "Role-play handoff orchestration detected": 5,
@@ -247,6 +267,8 @@ def score_maturity(target: Path, findings: list[dict[str, Any]]) -> dict[str, An
             "page_fault",
             "stateful_recovery",
             "environment_state",
+            "llm_cli_workers",
+            "task_envelope",
             "impression_pointer",
             "fairness",
             "capability_table",

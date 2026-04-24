@@ -14,6 +14,7 @@ Start here:
 - [Architecture](./architecture.md)
 - [Agent As Operating System](./agent-os.md)
 - [Stateful Agent](./stateful-agent.md)
+- [CLI Process Pool](./cli-process-pool.md)
 - [Completion Closure](./completion-closure.md)
 - [Impression Memory](./impression-memory.md)
 - [Target Agent Self-Review](./target-agent-self-review.md)

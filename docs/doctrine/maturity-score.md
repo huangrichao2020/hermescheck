@@ -56,6 +56,8 @@ The score rewards concrete runtime primitives:
 - traces/evals
 - stateful recovery
 - environment-as-state
+- LLM CLI workers
+- task envelope
 
 ## What Lowers The Score
 
@@ -68,6 +70,7 @@ Findings subtract points. The largest deductions come from architecture gaps tha
 - tool syscalls lack an explicit capability table
 - knowledge surfaces lack semantic VFS
 - context replay exists without a Stateful Agent recovery contract
+- external LLM CLI calls lack Task JSON, output capture, or process controls
 - orchestration sprawl or role-play handoffs dominate the runtime
 
 ## Why This Is Social

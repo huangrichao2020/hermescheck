@@ -98,6 +98,28 @@ PATTERNS = {
         r"(?:幂等恢复|幂等续接|自动续接|唤醒指令|中断恢复|恢复检查点)",
         re.IGNORECASE,
     ),
+    "llm_cli_worker": re.compile(
+        r"\b(?:llm cli|cli agent|external llm|external code tool|coding agent cli|qwen[-_ ]?code|"
+        r"qwen|codex|claude|gemini|opencode)\b.{0,80}\b(?:cli|command|subprocess|worker|spawn|process|pool)\b|"
+        r"\b(?:subprocess\.run|subprocess\.Popen|create_subprocess_exec)\b.{0,120}\b(?:qwen|codex|claude|gemini|opencode)\b|"
+        r"(?:外部\s*LLM|代码\s*CLI|CLI\s*进程池|命令行\s*worker|拉起\s*qwen|拉起\s*codex|拉起\s*claude)",
+        re.IGNORECASE,
+    ),
+    "task_envelope": re.compile(
+        r"\b(?:task json|task file|task envelope|work order|handoff file|job spec|delegation spec|"
+        r"structured task|task manifest)\b|(?:任务\s*JSON|任务文件|任务信封|工作单|交接文件|结构化任务)",
+        re.IGNORECASE,
+    ),
+    "cli_result_capture": re.compile(
+        r"\b(?:stdout|stderr|exit code|returncode|capture_output|completedprocess|standard output|"
+        r"process output|worker result)\b|(?:标准输出|标准错误|退出码|返回码|捕获输出|worker\s*结果)",
+        re.IGNORECASE,
+    ),
+    "cli_process_control": re.compile(
+        r"\b(?:process pool|worker pool|timeout|deadline|concurrency|semaphore|queue|cancel|cancellation|"
+        r"asyncio\.create_subprocess_exec|subprocess\.run\(.{0,80}timeout)\b|(?:进程池|worker\s*池|超时|并发|取消|队列)",
+        re.IGNORECASE,
+    ),
 }
 
 
@@ -299,6 +321,48 @@ def scan_os_architecture(target: Path) -> List[Dict[str, Any]]:
                     "Define a Stateful Agent recovery contract: replay the transcript, inspect durable filesystem or "
                     "server state, read a side-effect/action log, then resume through idempotent checkpoints so completed "
                     "work is not repeated."
+                ),
+            }
+        )
+
+    if signals.count("llm_cli_worker") >= 2 and (
+        signals.count("task_envelope") < 1
+        or signals.count("cli_result_capture") < 1
+        or signals.count("cli_process_control") < 1
+    ):
+        findings.append(
+            {
+                "severity": "medium",
+                "title": "LLM CLI worker contract incomplete",
+                "symptom": (
+                    f"Found {signals.count('llm_cli_worker')} external LLM CLI worker markers, but only "
+                    f"{signals.count('task_envelope')} task-envelope markers, "
+                    f"{signals.count('cli_result_capture')} result-capture markers, and "
+                    f"{signals.count('cli_process_control')} process-control markers."
+                ),
+                "user_impact": (
+                    "Calling Qwen, Codex, Claude, or other LLM CLIs through shell processes is powerful, but without "
+                    "a structured task file, captured stdout/stderr/exit status, and timeout/concurrency controls, "
+                    "the master agent cannot reliably audit, retry, or summarize worker output."
+                ),
+                "source_layer": "llm_cli_workers",
+                "mechanism": (
+                    "OS-lens scan for external LLM/code CLI workers versus task envelopes, result capture, and "
+                    "process-pool controls."
+                ),
+                "root_cause": (
+                    "The project appears to treat external LLM CLIs as ad hoc shell calls rather than as bounded worker "
+                    "processes with a clear input/output contract."
+                ),
+                "evidence_refs": signals.evidence(
+                    "llm_cli_worker", "task_envelope", "cli_result_capture", "cli_process_control"
+                ),
+                "confidence": 0.66,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Define an LLM CLI worker contract: write a Task JSON file, spawn the CLI with timeout and "
+                    "concurrency limits, capture stdout/stderr/exit code, and merge the worker result through the "
+                    "master agent's normal context and observability pipeline."
                 ),
             }
         )

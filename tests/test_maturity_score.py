@@ -156,3 +156,22 @@ def test_maturity_score_rewards_stateful_agent_primitives(tmp_path: Path) -> Non
 
     assert "stateful recovery" in score["strengths"]
     assert "environment-as-state" in score["strengths"]
+
+
+def test_maturity_score_rewards_llm_cli_worker_primitives(tmp_path: Path) -> None:
+    (tmp_path / "cli_workers.md").write_text(
+        "\n".join(
+            [
+                "methodology: CLI worker delegation rubric",
+                "The master agent uses a CLI process pool to spawn qwen, codex, and claude command workers.",
+                "Each external LLM CLI receives a Task JSON task envelope and returns stdout, stderr, and exit code.",
+                "The supervisor captures process output with timeout and concurrency controls.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    score = score_maturity(tmp_path, findings=[])
+
+    assert "LLM CLI workers" in score["strengths"]
+    assert "task envelope" in score["strengths"]
