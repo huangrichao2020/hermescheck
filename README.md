@@ -21,7 +21,9 @@ Hermes-specific review workflows.
 Long-term commitment: `hermescheck` is designed to stay in deep alignment with
 Hermes Agent. It will be maintained release by release, updating checks,
 documentation, and regression coverage so every Hermes release can ship with a
-clear community health-check path for forks and deployments.
+clear community health-check path for forks and deployments. It will also help
+Hermes Agent reach, support, and earn practical adoption among Chinese
+developer communities.
 
 <p align="center">
   <a href="https://github.com/huangrichao2020/hermescheck/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/huangrichao2020/hermescheck/ci.yml?branch=main&label=CI&style=flat-square"></a>
