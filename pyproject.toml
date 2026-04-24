@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hermescheck"
+version = "0.1.0"
+description = "Hermes Agent-focused architecture and runtime health checks"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+keywords = ["hermes-agent", "agent", "llm", "audit", "health-check", "ai", "security"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Security",
+]
+dependencies = ["jsonschema>=4.23.0"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+hermescheck = "hermescheck.cli:main"
+
+[project.urls]
+"Homepage" = "https://github.com/huangrichao2020/hermescheck"
+"Bug Tracker" = "https://github.com/huangrichao2020/hermescheck/issues"
+
+[tool.setuptools.packages.find]
+include = ["hermescheck*"]
+
+[tool.setuptools.package-data]
+hermescheck = ["schema.json"]
+
+[tool.ruff]
+line-length = 120

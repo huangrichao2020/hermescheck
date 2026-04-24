@@ -1,0 +1,34 @@
+{
+  "methodology_version": "target-agent-self-review.v1",
+  "agent_name": "MyAgent",
+  "summary": "I inspected my own source tree before hermescheck ran. Replace this with a concise architecture summary.",
+  "claims": [
+    {
+      "title": "The main loop and tool boundary are explicit",
+      "evidence": "src/agent.py",
+      "recommendation": "Use this as context when reviewing orchestration or tool-boundary findings."
+    }
+  ],
+  "risks": [
+    {
+      "title": "Completion closure may stop too early",
+      "evidence": "src/memory/write_memory.py",
+      "recommendation": "Check file creation -> index update -> impression card -> anchor mapping -> pointer registration -> acceptance."
+    }
+  ],
+  "false_positive_notes": [
+    {
+      "title": "Provider files are intentional extension points",
+      "evidence": "src/providers/openai.py",
+      "recommendation": "Do not treat normal provider implementation as hidden LLM usage without a bypass path."
+    }
+  ],
+  "improvement_plan": [
+    {
+      "title": "Add impression pointers",
+      "evidence": "docs/memory.md",
+      "recommendation": "Represent reusable recall as topic_anchor + semantic_hash + pointer_ref."
+    }
+  ],
+  "confidence": 0.75
+}

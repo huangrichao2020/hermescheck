@@ -1,0 +1,241 @@
+"""Scan agent projects through an operating-system architecture lens."""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List
+
+from hermescheck.scanners.path_filters import should_skip_path
+
+SCAN_EXTENSIONS = {
+    ".py",
+    ".ts",
+    ".js",
+    ".tsx",
+    ".jsx",
+    ".md",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".json",
+}
+SKIP_DIRS = {
+    ".git",
+    ".github",
+    "node_modules",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "dist",
+    "build",
+    "coverage",
+    "locales",
+}
+SKIP_FILENAMES = {
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "bun.lockb",
+    "poetry.lock",
+    "uv.lock",
+}
+MAX_FILE_BYTES = 250_000
+
+PATTERNS = {
+    "kernel": re.compile(
+        r"\b(?:harness|orchestrator|scheduler|kernel|agent loop|react loop|main loop)\b", re.IGNORECASE
+    ),
+    "memory": re.compile(
+        r"\b(?:context|memory|summary|compact|compression|rag|vector|embedding|history)\b", re.IGNORECASE
+    ),
+    "paging": re.compile(
+        r"\b(?:page table|page fault|paging|swap(?: in| out)?|lru|hot data|cold data|heat score|ttl|recency|pin(?:ned)?)\b",
+        re.IGNORECASE,
+    ),
+    "tool_syscall": re.compile(
+        r"\b(?:tool use|tool call|tool_call|function calling|function_call|execute[_ -]?shell(?:_command)?|shell command|subprocess|system call|syscall)\b",
+        re.IGNORECASE,
+    ),
+    "capability": re.compile(
+        r"\b(?:syscall table|capability|capabilities|cap_[a-z0-9_]+|permission matrix|seccomp)\b",
+        re.IGNORECASE,
+    ),
+    "scheduler": re.compile(
+        r"\b(?:worker|swarm|queue|task|job|heartbeat|cron|scheduler|delegate|subagent)\b", re.IGNORECASE
+    ),
+    "fairness": re.compile(
+        r"\b(?:time slice|timeslice|deadline|budget|priority|preempt|context switch|yield|cancel|cancellation|backpressure)\b",
+        re.IGNORECASE,
+    ),
+    "semantic_storage": re.compile(
+        r"\b(?:knowledge|skills?|rag|vector[_ -]?store|vectordb|embedding|docs?|notes?|github|resources?)\b",
+        re.IGNORECASE,
+    ),
+    "vfs": re.compile(r"\b(?:vfs|virtual file|mount|mount point|resource path|semantic fs)\b", re.IGNORECASE),
+}
+
+
+@dataclass
+class SignalSet:
+    refs: dict[str, list[str]]
+
+    def count(self, key: str) -> int:
+        return len(self.refs.get(key, []))
+
+    def evidence(self, *keys: str, limit: int = 8) -> list[str]:
+        evidence_refs: list[str] = []
+        seen: set[str] = set()
+        for key in keys:
+            for ref in self.refs.get(key, []):
+                if ref not in seen:
+                    evidence_refs.append(ref)
+                    seen.add(ref)
+                if len(evidence_refs) >= limit:
+                    return evidence_refs
+        return evidence_refs
+
+
+def _should_skip(path: Path) -> bool:
+    if path.name.lower() in SKIP_FILENAMES:
+        return True
+    try:
+        if path.stat().st_size > MAX_FILE_BYTES:
+            return True
+    except OSError:
+        return True
+    return should_skip_path(path, SKIP_DIRS)
+
+
+def _collect_signals(target: Path) -> SignalSet:
+    refs: dict[str, list[str]] = {key: [] for key in PATTERNS}
+    files = [target] if target.is_file() else sorted(target.rglob("*"))
+    for fp in files:
+        if not fp.is_file() or _should_skip(fp) or fp.suffix not in SCAN_EXTENSIONS:
+            continue
+
+        try:
+            lines = fp.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except (OSError, PermissionError):
+            continue
+
+        for lineno, line in enumerate(lines, start=1):
+            for key, pattern in PATTERNS.items():
+                if pattern.search(line):
+                    refs[key].append(f"{fp}:{lineno}")
+    return SignalSet(refs=refs)
+
+
+def scan_os_architecture(target: Path) -> List[Dict[str, Any]]:
+    signals = _collect_signals(target)
+    findings: List[Dict[str, Any]] = []
+
+    if signals.count("memory") >= 5 and signals.count("paging") < 2:
+        findings.append(
+            {
+                "severity": "high",
+                "title": "Context memory lacks paging policy",
+                "symptom": (
+                    f"Found {signals.count('memory')} memory/context/RAG markers but only "
+                    f"{signals.count('paging')} paging-policy markers."
+                ),
+                "user_impact": (
+                    "Without a hot/cold memory policy, context compression becomes a one-way summary step. "
+                    "Agents either keep too much in prompt or lose details with no page-fault path to recover them."
+                ),
+                "source_layer": "os_memory",
+                "mechanism": "OS-lens scan for memory, context compaction, RAG, and paging vocabulary.",
+                "root_cause": (
+                    "The project appears to manage context as linear text instead of virtual memory with active pages, "
+                    "archived pages, and targeted swap-in."
+                ),
+                "evidence_refs": signals.evidence("memory", "paging"),
+                "confidence": 0.7,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Introduce a context page table: active prompt pages, short-term memory pages, and long-term "
+                    "archive pages. Add retrieval-triggered page faults so old details can be swapped back in on demand."
+                ),
+            }
+        )
+
+    if signals.count("tool_syscall") >= 3 and signals.count("capability") < 2:
+        findings.append(
+            {
+                "severity": "medium",
+                "title": "Tool syscalls lack explicit capability table",
+                "symptom": (
+                    f"Found {signals.count('tool_syscall')} tool/system-call markers but only "
+                    f"{signals.count('capability')} capability or sandbox markers."
+                ),
+                "user_impact": (
+                    "Tools are the agent equivalent of syscalls. If their permissions are implicit, it becomes hard "
+                    "to reason about which calls can read, write, execute, access network, or mutate workspace state."
+                ),
+                "source_layer": "os_syscall",
+                "mechanism": "OS-lens scan for tool/function-calling surfaces versus capability/sandbox vocabulary.",
+                "root_cause": "The tool boundary appears to be described by code paths rather than a small syscall table.",
+                "evidence_refs": signals.evidence("tool_syscall", "capability"),
+                "confidence": 0.66,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Document a syscall table for tools. Give each tool explicit capabilities such as read, write, "
+                    "execute, network, secrets, and workspace mutation, then map approval or sandbox behavior to them."
+                ),
+            }
+        )
+
+    if signals.count("scheduler") >= 5 and signals.count("fairness") < 2:
+        findings.append(
+            {
+                "severity": "high",
+                "title": "Agent scheduler lacks fairness controls",
+                "symptom": (
+                    f"Found {signals.count('scheduler')} worker/task/scheduler markers but only "
+                    f"{signals.count('fairness')} timeout, priority, or budget markers."
+                ),
+                "user_impact": (
+                    "Long-running tool calls or background workers can starve short user-visible tasks when the "
+                    "runtime has no visible time slicing, priorities, cancellation, or budget accounting."
+                ),
+                "source_layer": "os_scheduler",
+                "mechanism": "OS-lens scan for worker/swarm/queue/task surfaces versus fairness controls.",
+                "root_cause": "The runtime appears to schedule work, but the scheduling policy is not explicit in code or docs.",
+                "evidence_refs": signals.evidence("scheduler", "fairness"),
+                "confidence": 0.69,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Add scheduler policy before adding more workers: per-task timeouts, user-command priority, "
+                    "background-task budgets, cancellation, and a visible queue state for stuck or starved work."
+                ),
+            }
+        )
+
+    if signals.count("semantic_storage") >= 5 and signals.count("vfs") < 2:
+        findings.append(
+            {
+                "severity": "medium",
+                "title": "Knowledge surfaces lack semantic VFS",
+                "symptom": (
+                    f"Found {signals.count('semantic_storage')} knowledge/RAG/skill/storage markers but only "
+                    f"{signals.count('vfs')} mount or VFS markers."
+                ),
+                "user_impact": (
+                    "When local files, skills, docs, GitHub knowledge, and vector stores use separate access paths, "
+                    "agents need custom routing logic instead of one predictable address space."
+                ),
+                "source_layer": "os_vfs",
+                "mechanism": "OS-lens scan for knowledge and retrieval surfaces versus virtual filesystem vocabulary.",
+                "root_cause": "External knowledge appears to be integrated as special-case retrieval rather than mounted storage.",
+                "evidence_refs": signals.evidence("semantic_storage", "vfs"),
+                "confidence": 0.64,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Define semantic mount points such as /workspace, /memory, /skills, /knowledge/github, and "
+                    "/knowledge/docs. Let the agent use one resource addressing model while adapters handle storage."
+                ),
+            }
+        )
+
+    return findings

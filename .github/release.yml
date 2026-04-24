@@ -1,0 +1,36 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - allcontributors[bot]
+      - dependabot[bot]
+  categories:
+    - title: Agent Intelligence Standards
+      labels:
+        - era-scoring
+        - methodology
+        - doctrine
+        - agent-intelligence
+    - title: Scanner Signals
+      labels:
+        - scanner
+        - false-positive
+        - detection
+    - title: Contribution Flow and Governance
+      labels:
+        - governance
+        - contribution-flow
+        - contributors
+    - title: Documentation
+      labels:
+        - documentation
+        - docs
+    - title: CI, Release, and Packaging
+      labels:
+        - ci
+        - release
+        - packaging
+    - title: Other Changes
+      labels:
+        - "*"

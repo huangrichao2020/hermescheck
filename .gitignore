@@ -1,0 +1,11 @@
+
+*.pyc
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+audit_results.json
+audit_report.md
