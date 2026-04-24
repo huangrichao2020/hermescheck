@@ -63,38 +63,9 @@ shares one command contract, every tool crosses an explicit capability boundary,
 memory is paged and recoverable, and each release can be checked through a
 repeatable evidence pipeline.
 
-```mermaid
-flowchart TD
-    U["User, gateway, cron, or automation"] --> C["Canonical command contract"]
-    C --> R["Agent runtime kernel"]
-    R --> S["Stateful recovery layer"]
-    R --> M["Memory and skill OS"]
-    R --> T["Tool syscall boundary"]
-    R --> Q["Scheduler and job control"]
-
-    C --> C1["Shared registry, resolver, help text, autocomplete, platform menus"]
-
-    S --> S1["Context replay: transcript, session history, tool calls"]
-    S --> S2["Environment state: workspace, files, server, queues"]
-    S --> S3["Side-effect log: command output, tool result, irreversible actions"]
-    S --> S4["Idempotent resume: skip completed work, retry missing work"]
-
-    M --> M1["Fact memory and skill memory"]
-    M --> M2["Impression pointers and semantic anchors"]
-    M --> M3["Page table, hot/cold memory, page-fault recovery"]
-    M --> M4["Semantic VFS: /workspace, /memory, /skills, /knowledge"]
-
-    T --> T1["Capability table: read, write, execute, network, secrets"]
-    T --> T2["Sandbox, approval, schema validation, observable failures"]
-
-    Q --> Q1["Priority, timeout, budget, cancellation, backpressure"]
-    Q --> Q2["Cron, background jobs, gateway work, user-visible tasks"]
-
-    R --> O["Observability and release guardrail"]
-    O --> O1["Traces, evals, cost and failure telemetry"]
-    O --> O2["Markdown, JSON, SARIF, CI evidence"]
-    O --> O3["Hermes release-by-release regression checks"]
-```
+<p align="center">
+  <img src="./assets/readme/hermescheck-full-score-agent-architecture.png" alt="HermesCheck full-score agent architecture: command contract, stateful recovery, memory and skill OS, tool syscall boundary, scheduler, and release guardrail" width="100%">
+</p>
 
 The architecture should provide these capabilities:
 
