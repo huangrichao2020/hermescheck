@@ -162,7 +162,8 @@
               "os_memory",
               "os_scheduler",
               "os_syscall",
-              "os_vfs"
+              "os_vfs",
+              "stateful_recovery"
             ]
           },
           "minItems": 1

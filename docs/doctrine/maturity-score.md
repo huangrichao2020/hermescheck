@@ -54,6 +54,8 @@ The score rewards concrete runtime primitives:
 - capability table
 - semantic VFS
 - traces/evals
+- stateful recovery
+- environment-as-state
 
 ## What Lowers The Score
 
@@ -65,6 +67,7 @@ Findings subtract points. The largest deductions come from architecture gaps tha
 - scheduler lacks fairness controls
 - tool syscalls lack an explicit capability table
 - knowledge surfaces lack semantic VFS
+- context replay exists without a Stateful Agent recovery contract
 - orchestration sprawl or role-play handoffs dominate the runtime
 
 ## Why This Is Social

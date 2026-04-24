@@ -88,7 +88,7 @@ SCANNER_REGISTRY = [
         slug="os_architecture",
         name="Agent OS Architecture",
         func=_adapt(scan_os_architecture),
-        audited_layers=("os_memory", "os_scheduler", "os_syscall", "os_vfs"),
+        audited_layers=("os_memory", "os_scheduler", "os_syscall", "os_vfs", "stateful_recovery"),
     ),
     ScannerSpec(
         slug="skill_duplication",

@@ -40,6 +40,7 @@ ways ordinary linters do not catch.
 - Does this checkout still contain the core Hermes runtime surfaces?
 - Are slash commands derived from the central registry instead of diverging per surface?
 - Do CLI, TUI, gateway, skills, cron, and SessionDB still line up?
+- Can interrupted runs resume from transcript plus durable environment state?
 - Are tool/syscall boundaries explicit enough for high-agency operation?
 - Is memory becoming a durable subsystem rather than context stuffing?
 - Are startup paths, plugins, and background jobs becoming hard to reason about?
@@ -114,7 +115,7 @@ The Hermes-specific scanner runs alongside inherited architecture checks:
 - memory freshness confusion
 - impression/pointer memory gaps
 - role-play handoff chains
-- agent-OS architecture gaps
+- agent-OS architecture gaps, including Stateful Agent recovery
 - duplicated skills and SOPs
 - startup and runtime surface sprawl
 - hidden LLM calls
@@ -179,6 +180,7 @@ Then use the report to answer:
 - Did any interface work in CLI but not gateway, or vice versa?
 - Did a new tool path get a capability boundary, test, and observable failure mode?
 - Did a memory or skill change preserve recall, search, and closure behavior?
+- Can an interrupted run verify environment state before repeating tool work?
 - Can the PR description cite a concrete validation command?
 
 The goal is not to block Hermes experimentation. The goal is to make drift

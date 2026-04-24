@@ -137,3 +137,22 @@ def test_maturity_score_penalizes_architecture_findings(tmp_path: Path) -> None:
 
     assert score["penalty"] > 0
     assert score["score"] < score["raw_points"]
+
+
+def test_maturity_score_rewards_stateful_agent_primitives(tmp_path: Path) -> None:
+    (tmp_path / "stateful_agent.md").write_text(
+        "\n".join(
+            [
+                "methodology: recovery rubric for Stateful Agent runtime behavior",
+                "context replay restores conversation history after an interrupted run",
+                "environment is the state: filesystem state, workspace state, and server state are inspected first",
+                "side-effect log stores tool result and command output for idempotent recovery checkpoints",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    score = score_maturity(tmp_path, findings=[])
+
+    assert "stateful recovery" in score["strengths"]
+    assert "environment-as-state" in score["strengths"]

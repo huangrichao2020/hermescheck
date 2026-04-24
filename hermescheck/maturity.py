@@ -86,6 +86,20 @@ SIGNAL_PATTERNS = {
     "observability": re.compile(
         r"\b(?:trace|tracing|telemetry|span|eval|evaluation|reward|cost tracking)\b", re.IGNORECASE
     ),
+    "stateful_recovery": re.compile(
+        r"\b(?:stateful agent|context replay|conversation replay|transcript replay|resumable run|"
+        r"resume after interruption|idempotent recovery|idempotent resume|wake[-_ ]?up instruction|"
+        r"system interrupt|durable execution|recovery checkpoint)\b|"
+        r"(?:Stateful Agent|上下文回放|录像带|自动续接|唤醒指令|中断恢复|幂等恢复|恢复检查点)",
+        re.IGNORECASE,
+    ),
+    "environment_state": re.compile(
+        r"\b(?:environment state|environment is the state|filesystem state|file system state|workspace state|"
+        r"working tree|server state|durable filesystem|durable workspace|persistent workspace|on-disk state|"
+        r"side[-_ ]?effect log|action log|operation log|journal|tool result|command output)\b|"
+        r"(?:环境即状态|环境状态|现场|服务器文件|硬盘|物理生效|副作用记录|动作日志|操作日志)",
+        re.IGNORECASE,
+    ),
 }
 
 SIGNAL_POINTS = {
@@ -104,6 +118,8 @@ SIGNAL_POINTS = {
     "capability_table": 8,
     "semantic_vfs": 8,
     "observability": 7,
+    "stateful_recovery": 10,
+    "environment_state": 8,
 }
 
 SIGNAL_LABELS = {
@@ -122,6 +138,8 @@ SIGNAL_LABELS = {
     "capability_table": "capability table",
     "semantic_vfs": "semantic VFS",
     "observability": "traces/evals",
+    "stateful_recovery": "stateful recovery",
+    "environment_state": "environment-as-state",
 }
 
 MILESTONES = {
@@ -133,6 +151,8 @@ MILESTONES = {
     "capability_table": "把工具边界整理成 syscall/capability table，而不是散落在代码里。",
     "semantic_vfs": "把 skills、RAG、docs、GitHub、notes 挂到统一 semantic VFS 地址空间。",
     "observability": "保留 traces/evals，让 agent 的进化可以被复盘和比较。",
+    "stateful_recovery": "把自动续接做成 Stateful Agent 契约：context replay + environment state + side-effect log + idempotent recovery。",
+    "environment_state": "把 filesystem/server/workspace 状态纳入可验证状态模型，恢复时先读取现场再决定下一步。",
 }
 
 FINDING_PENALTIES = {
@@ -142,6 +162,7 @@ FINDING_PENALTIES = {
     "Agent scheduler lacks fairness controls": 8,
     "Tool syscalls lack explicit capability table": 8,
     "Knowledge surfaces lack semantic VFS": 7,
+    "Stateful Agent recovery contract incomplete": 8,
     "Internal orchestration sprawl detected": 6,
     "Memory freshness / generation confusion detected": 6,
     "Role-play handoff orchestration detected": 5,
@@ -224,6 +245,8 @@ def score_maturity(target: Path, findings: list[dict[str, Any]]) -> dict[str, An
             "methodology",
             "paging",
             "page_fault",
+            "stateful_recovery",
+            "environment_state",
             "impression_pointer",
             "fairness",
             "capability_table",

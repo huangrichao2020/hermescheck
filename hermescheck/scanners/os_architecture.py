@@ -74,6 +74,30 @@ PATTERNS = {
         re.IGNORECASE,
     ),
     "vfs": re.compile(r"\b(?:vfs|virtual file|mount|mount point|resource path|semantic fs)\b", re.IGNORECASE),
+    "context_replay": re.compile(
+        r"\b(?:context replay|conversation replay|transcript replay|session replay|chat history|"
+        r"stored conversation|conversation history|runstate|run state|previous_response_id|conversation id)\b|"
+        r"(?:上下文回放|录像带|聊天记录|会话历史|读档)",
+        re.IGNORECASE,
+    ),
+    "environment_state": re.compile(
+        r"\b(?:environment state|environment is the state|filesystem state|file system state|workspace state|"
+        r"working tree|server state|durable filesystem|durable workspace|persistent workspace|on-disk state)\b|"
+        r"(?:环境即状态|环境状态|现场|服务器文件|硬盘|物理生效)",
+        re.IGNORECASE,
+    ),
+    "side_effect_log": re.compile(
+        r"\b(?:side[-_ ]?effect log|action log|operation log|audit log|journal|write[-_ ]?ahead|"
+        r"commit log|trajectory|tool result|command output|execution record)\b|"
+        r"(?:副作用记录|动作日志|操作日志|执行记录|工具结果|命令输出)",
+        re.IGNORECASE,
+    ),
+    "idempotent_recovery": re.compile(
+        r"\b(?:idempotent recovery|idempotent resume|retry[-_ ]?safe|resumable run|resume after interruption|"
+        r"interrupted run|wake[-_ ]?up instruction|system interrupt|recovery checkpoint|durable execution)\b|"
+        r"(?:幂等恢复|幂等续接|自动续接|唤醒指令|中断恢复|恢复检查点)",
+        re.IGNORECASE,
+    ),
 }
 
 
@@ -234,6 +258,47 @@ def scan_os_architecture(target: Path) -> List[Dict[str, Any]]:
                 "recommended_fix": (
                     "Define semantic mount points such as /workspace, /memory, /skills, /knowledge/github, and "
                     "/knowledge/docs. Let the agent use one resource addressing model while adapters handle storage."
+                ),
+            }
+        )
+
+    replay_markers = signals.count("context_replay") + signals.count("idempotent_recovery")
+    if replay_markers >= 2 and (
+        signals.count("environment_state") < 1
+        or signals.count("side_effect_log") < 1
+        or signals.count("idempotent_recovery") < 1
+    ):
+        findings.append(
+            {
+                "severity": "high",
+                "title": "Stateful Agent recovery contract incomplete",
+                "symptom": (
+                    f"Found {signals.count('context_replay')} context-replay markers and "
+                    f"{signals.count('idempotent_recovery')} resume/recovery markers, but only "
+                    f"{signals.count('environment_state')} environment-state markers and "
+                    f"{signals.count('side_effect_log')} side-effect log markers."
+                ),
+                "user_impact": (
+                    "An agent that can replay chat history but cannot verify real workspace/server state may repeat "
+                    "irreversible tool work or skip necessary recovery after an interrupted turn."
+                ),
+                "source_layer": "stateful_recovery",
+                "mechanism": (
+                    "OS-lens scan for context replay, durable environment state, side-effect logs, and idempotent resume."
+                ),
+                "root_cause": (
+                    "The project appears to describe continuation as conversation memory, but not as a full stateful "
+                    "runtime contract grounded in the actual environment and recorded side effects."
+                ),
+                "evidence_refs": signals.evidence(
+                    "context_replay", "idempotent_recovery", "environment_state", "side_effect_log"
+                ),
+                "confidence": 0.68,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Define a Stateful Agent recovery contract: replay the transcript, inspect durable filesystem or "
+                    "server state, read a side-effect/action log, then resume through idempotent checkpoints so completed "
+                    "work is not repeated."
                 ),
             }
         )

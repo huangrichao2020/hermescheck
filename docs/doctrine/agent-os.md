@@ -12,6 +12,7 @@ The model is computation. The harness is the kernel. Tools are syscalls. Context
 | System call | Tool use / function calling | Is there a small syscall table with declared capabilities? |
 | Virtual memory | Context window / memory / summaries | Is there a hot/cold paging policy and a page-fault path? |
 | Cache / swap | Short-term memory / long-term archive | Can the runtime swap in the exact old detail instead of reloading everything? |
+| Durable state | Filesystem / workspace / server state | Can the agent verify what really happened before resuming work? |
 | Scheduler | Harness / orchestrator | Are timeouts, priorities, budgets, and cancellation explicit? |
 | VFS / mount point | RAG / skills / knowledge | Can the agent address external knowledge through one resource namespace? |
 | Ring boundary | Sandbox / approval / isolation | Is high-agency execution separated from normal reasoning? |
@@ -21,6 +22,8 @@ The model is computation. The harness is the kernel. Tools are syscalls. Context
 Keep the kernel small. The orchestrator should own scheduling, permissions, state transitions, and recovery. It should not become a pile of business logic.
 
 Treat context as scarce memory. A context compactor that only summarizes is closer to lossy logging than memory management. Stronger systems track what is hot, what is cold, what is pinned, and how an old detail returns when needed.
+
+Treat environment as state. A Stateful Agent is not stateful because the model keeps thinking between turns. It is stateful because the runtime can replay context, inspect durable workspace or server state, and recover from recorded side effects without repeating completed work.
 
 Treat tools as syscalls. A tool is a controlled hole through the reasoning boundary. It should have a declared capability surface: read, write, execute, network, secrets, workspace mutation, and external side effects.
 
@@ -33,6 +36,7 @@ Treat scheduling as a product feature. User-visible work should not be starved b
 The `os_architecture` scanner looks for projects that already have agent OS symptoms but do not name the matching OS primitive:
 
 - memory and context compaction without paging
+- context replay and interrupted runs without environment-state recovery
 - tool calling without a syscall or capability table
 - workers and queues without fairness controls
 - RAG, skills, and docs without semantic mount points

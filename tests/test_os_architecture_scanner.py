@@ -79,3 +79,36 @@ def test_os_architecture_accepts_explicit_paging_capabilities_and_mounts(tmp_pat
     )
 
     assert scan_os_architecture(tmp_path) == []
+
+
+def test_os_architecture_flags_incomplete_stateful_recovery_contract(tmp_path: Path) -> None:
+    (tmp_path / "runtime.md").write_text(
+        "\n".join(
+            [
+                "The agent supports context replay from chat history after an interrupted run.",
+                "A system interrupt injects a wake-up instruction so a resumable run can continue.",
+                "The design stops at conversation memory and never explains how real-world changes are verified.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_os_architecture(tmp_path)
+
+    assert "Stateful Agent recovery contract incomplete" in _titles(findings)
+
+
+def test_os_architecture_accepts_stateful_recovery_contract(tmp_path: Path) -> None:
+    (tmp_path / "runtime.md").write_text(
+        "\n".join(
+            [
+                "Stateful Agent recovery starts with context replay from conversation history.",
+                "The runner reads environment state from filesystem state, workspace state, and server state.",
+                "Every tool result is stored in a side-effect log with command output and action log entries.",
+                "Resume after interruption uses idempotent recovery checkpoints before the next tool call.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    assert scan_os_architecture(tmp_path) == []
