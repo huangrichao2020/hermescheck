@@ -134,6 +134,59 @@ Run as a module from a local clone:
 python -m hermescheck ./path/to/hermes-agent --quiet
 ```
 
+## Example Report Snapshot
+
+`hermescheck` is designed to produce a first-screen summary that maintainers
+can understand immediately, then drill into through Markdown, JSON, or SARIF.
+
+Chinese:
+
+```text
+结果摘要:
+- Overall Health: unstable
+- Architecture Era: 内燃气时代 (75/100)
+- 总问题数: 108
+- HIGH: 5
+- MEDIUM: 88
+- LOW: 15
+
+最主要的 5 个高优先级问题:
+1. Internal orchestration sprawl detected
+   - 编排/规划/路由/恢复/调度层过多，主循环职责不够单一
+2. Memory freshness / generation confusion detected
+   - 记忆面过多，存在“哪个是最新 authoritative memory”的歧义
+3. Role-play handoff orchestration detected
+   - 角色化/部门化 handoff 偏多，容易造成上下文漂移
+4. Startup surface sprawl detected
+   - 启动入口和 wrapper 较多，启动链路不够收敛
+5. Runtime surface sprawl detected
+   - runtime 面太多 (agent_stack / ops / queue / storage / ui / web_api)，理解和维护成本高
+```
+
+English:
+
+```text
+Report summary:
+- Overall Health: unstable
+- Architecture Era: Combustion Age (75/100)
+- Total Issues: 108
+- HIGH: 5
+- MEDIUM: 88
+- LOW: 15
+
+Top 5 high-priority issues:
+1. Internal orchestration sprawl detected
+   - Too many planning, routing, recovery, and scheduling layers; main-loop ownership is not clear enough.
+2. Memory freshness / generation confusion detected
+   - Too many memory surfaces; unclear which one is the latest authoritative memory.
+3. Role-play handoff orchestration detected
+   - Too many department-style handoffs; context can drift between roles.
+4. Startup surface sprawl detected
+   - Too many entrypoints and wrappers; the startup chain is not convergent enough.
+5. Runtime surface sprawl detected
+   - Runtime spans too many surfaces (agent_stack / ops / queue / storage / ui / web_api), raising comprehension and maintenance cost.
+```
+
 ## Hermes-Specific Checks
 
 ### Runtime Contract
