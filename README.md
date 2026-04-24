@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="./assets/readme/hermescheck-readme-banner.png" alt="HermesCheck - Hermes Agent-focused architecture and runtime health checks" width="100%">
+  <a href="#quick-start">
+    <img src="./assets/readme/hermescheck-readme-banner.png" alt="HermesCheck - Hermes Agent-focused architecture and runtime health checks" width="100%">
+  </a>
 </p>
 
 # hermescheck
