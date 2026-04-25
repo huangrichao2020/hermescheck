@@ -113,6 +113,12 @@ SIGNAL_PATTERNS = {
         r"(?:任务\s*JSON|任务文件|任务信封|工作单|标准输出|退出码|捕获输出)",
         re.IGNORECASE,
     ),
+    "cli_prompt_contract": re.compile(
+        r"\b(?:natural language prompt|natural-language prompt|prompt text|worker prompt|stdin prompt|"
+        r"to_prompt|task file path|read this task file|do not send raw json|not raw json|no raw json)\b|"
+        r"(?:自然语言\s*Prompt|自然语言提示|worker\s*提示词|stdin\s*提示词|不要裸(?:扔|传)\s*JSON|不能裸(?:扔|传)\s*JSON)",
+        re.IGNORECASE,
+    ),
 }
 
 SIGNAL_POINTS = {
@@ -135,6 +141,7 @@ SIGNAL_POINTS = {
     "environment_state": 8,
     "llm_cli_workers": 8,
     "task_envelope": 7,
+    "cli_prompt_contract": 4,
 }
 
 SIGNAL_LABELS = {
@@ -157,6 +164,7 @@ SIGNAL_LABELS = {
     "environment_state": "environment-as-state",
     "llm_cli_workers": "LLM CLI workers",
     "task_envelope": "task envelope",
+    "cli_prompt_contract": "CLI prompt contract",
 }
 
 MILESTONES = {
@@ -172,6 +180,7 @@ MILESTONES = {
     "environment_state": "把 filesystem/server/workspace 状态纳入可验证状态模型，恢复时先读取现场再决定下一步。",
     "llm_cli_workers": "把 Qwen/Codex/Claude 等外部 CLI 当作 bounded worker process，而不是临时 shell 魔法。",
     "task_envelope": "用 Task JSON + stdout/stderr/exit code + timeout/concurrency 控制定义 CLI worker 的输入输出契约。",
+    "cli_prompt_contract": "Task JSON 用于审计和任务文件，传给 Qwen/Codex stdin 的应是自然语言 Prompt 或任务文件引用。",
 }
 
 FINDING_PENALTIES = {

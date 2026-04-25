@@ -137,6 +137,7 @@ def test_os_architecture_accepts_llm_cli_worker_contract(tmp_path: Path) -> None
             [
                 "The master agent owns a CLI process pool for external LLM CLI workers: qwen, codex, and claude.",
                 "Each worker receives a Task JSON task envelope with context, files, and acceptance criteria.",
+                "The worker stdin receives a natural-language prompt generated from that task envelope, not raw JSON.",
                 "The supervisor captures stdout, stderr, exit code, returncode, and process output.",
                 "Worker pool execution uses timeout, concurrency, cancellation, and queue controls.",
             ]
@@ -145,3 +146,22 @@ def test_os_architecture_accepts_llm_cli_worker_contract(tmp_path: Path) -> None
     )
 
     assert scan_os_architecture(tmp_path) == []
+
+
+def test_os_architecture_flags_cli_worker_without_prompt_contract(tmp_path: Path) -> None:
+    (tmp_path / "delegation.md").write_text(
+        "\n".join(
+            [
+                "The master agent owns a CLI process pool for external LLM CLI workers: qwen, codex, and claude.",
+                "It spawns qwen and codex command workers for bounded code tasks.",
+                "Each worker receives a Task JSON task envelope with context, files, and acceptance criteria.",
+                "The supervisor captures stdout, stderr, exit code, returncode, and process output.",
+                "Worker pool execution uses timeout, concurrency, cancellation, and queue controls.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_os_architecture(tmp_path)
+
+    assert "LLM CLI worker contract incomplete" in _titles(findings)

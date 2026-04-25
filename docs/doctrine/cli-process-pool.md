@@ -5,13 +5,13 @@ A CLI process pool lets a master agent delegate work to external LLM code tools 
 The pattern is intentionally Unix-shaped:
 
 ```text
-Master agent -> Task JSON -> qwen/codex/claude CLI worker -> stdout/stderr/exit code -> master agent
+Master agent -> Task JSON/task file -> natural-language worker prompt -> qwen/codex/claude CLI worker -> stdout/stderr/exit code -> master agent
 ```
 
 ## Roles
 
 - Master agent: decomposes the task, chooses the worker, writes the task envelope, starts the process, captures results, and merges the outcome.
-- CLI worker: a short-lived Qwen, Codex, Claude, Gemini, or OpenCode process that reads the task file, does the work, and exits.
+- CLI worker: a short-lived Qwen, Codex, Claude, Gemini, or OpenCode process that reads a natural-language prompt or a referenced task file, does the work, and exits.
 - Task envelope: a structured JSON file containing goal, context, file paths, constraints, acceptance criteria, and output contract.
 
 ## Hermes Angle
@@ -26,6 +26,7 @@ A mature CLI process pool should define:
 
 - which external LLM CLIs are allowed
 - how the master writes Task JSON
+- how the master converts Task JSON into a natural-language stdin prompt or task-file reference for CLI tools that do not accept raw JSON
 - where stdout, stderr, exit code, and result artifacts are captured
 - timeout, cancellation, concurrency, and retry policy
 - how worker output is merged into the master context
@@ -35,4 +36,6 @@ A mature CLI process pool should define:
 
 `hermescheck` rewards projects that describe LLM CLI workers and task envelopes.
 
-It flags Hermes forks that mention Qwen, Codex, Claude, or other external LLM CLI workers but do not describe Task JSON, output capture, and process controls. Without that contract, CLI delegation becomes shell-shaped hidden orchestration instead of an auditable Hermes runtime primitive.
+It flags Hermes forks that mention Qwen, Codex, Claude, or other external LLM CLI workers but do not describe Task JSON, prompt handoff, output capture, and process controls. Without that contract, CLI delegation becomes shell-shaped hidden orchestration instead of an auditable Hermes runtime primitive.
+
+One sharp rule: do not blindly pipe raw Task JSON into a human-oriented LLM CLI. Keep JSON as the durable task envelope and audit artifact, then pass a natural-language prompt or a task-file reference to stdin.

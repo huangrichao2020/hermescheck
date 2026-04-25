@@ -165,6 +165,7 @@ def test_maturity_score_rewards_llm_cli_worker_primitives(tmp_path: Path) -> Non
                 "methodology: CLI worker delegation rubric",
                 "The master agent uses a CLI process pool to spawn qwen, codex, and claude command workers.",
                 "Each external LLM CLI receives a Task JSON task envelope and returns stdout, stderr, and exit code.",
+                "The worker stdin receives a natural-language prompt generated from that task envelope, not raw JSON.",
                 "The supervisor captures process output with timeout and concurrency controls.",
             ]
         ),
@@ -175,3 +176,4 @@ def test_maturity_score_rewards_llm_cli_worker_primitives(tmp_path: Path) -> Non
 
     assert "LLM CLI workers" in score["strengths"]
     assert "task envelope" in score["strengths"]
+    assert "CLI prompt contract" in score["strengths"]
