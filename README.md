@@ -196,10 +196,16 @@ The Hermes-specific scanner runs alongside inherited architecture checks:
 
 - internal orchestration sprawl
 - completion-closure gaps
+- static bug inference from code patterns
+- token usage budget risks, including large default context windows and full-history prompt assembly
 - memory freshness confusion
+- memory lifecycle governance and CJK-safe retrieval paths
+- RAG retrieval governance and context-budget controls
+- self-evolution capability: external signals, source reading, pattern extraction, constraint adaptation, safe landing, and verification closure
 - impression/pointer memory gaps
 - role-play handoff chains
 - agent-OS architecture gaps, including Stateful Agent recovery
+- loop-safety budgets, daemon lifecycle controls, capability policies, plugin sandboxing, remote tool boundaries, and pipeline middleware integrity
 - LLM CLI worker contract gaps for Qwen/Codex/Claude-style process delegation, including raw-JSON stdin handoff
 - duplicated skills and SOPs
 - startup and runtime surface sprawl
@@ -234,7 +240,7 @@ Every scan produces:
 - `scan_metadata`: timestamp, duration, scanner count, profile
 - `executive_verdict`: health, primary failure mode, urgent fix
 - `scope`: entry points, channels, model stack, audited layers
-- `maturity_score`: architecture-era score and share line
+- `maturity_score`: architecture-era score, formula, positive signal ledger, penalty ledger, score caps, and share line
 - `evidence_pack`: compact evidence references
 - `findings`: severity-ranked issues with fixes
 - `ordered_fix_plan`: practical next steps

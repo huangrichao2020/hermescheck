@@ -7,6 +7,24 @@ from typing import Any, Dict, Optional
 SEVERITY_EMOJI = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}
 
 
+def _refs(refs: list[str], *, limit: int = 2) -> str:
+    shown = [f"`{ref}`" for ref in refs[:limit]]
+    if len(refs) > limit:
+        shown.append(f"+{len(refs) - limit} more")
+    return "<br>".join(shown) if shown else "-"
+
+
+def _cell(value: Any) -> str:
+    return str(value).replace("\n", " ").replace("|", "\\|")
+
+
+def _finding_penalty_lookup(maturity: Dict[str, Any]) -> dict[str, int]:
+    return {
+        item.get("title", ""): item.get("total_penalty", 0)
+        for item in maturity.get("penalty_breakdown", [])
+    }
+
+
 def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) -> str:
     """Generate a markdown report from audit results."""
 
@@ -55,12 +73,61 @@ def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) 
                 f"- Era: **{maturity.get('era_name', 'Unknown')}**",
                 f"- Score: **{maturity.get('score', 'N/A')}/100**",
                 f"- Raw points: `{maturity.get('raw_points', 'N/A')}`",
-                f"- Finding penalty: `{maturity.get('penalty', 'N/A')}`",
+                f"- Capped raw points: `{maturity.get('capped_raw_points', 'N/A')}`",
+                f"- Pre-penalty score: `{maturity.get('pre_penalty_score', 'N/A')}`",
+                f"- Finding penalty: `{maturity.get('penalty', 'N/A')}`"
+                f" (uncapped `{maturity.get('uncapped_penalty', 'N/A')}`, cap `{maturity.get('penalty_cap', 'N/A')}`)",
+                f"- Formula: `{maturity.get('score_formula', 'N/A')}`",
                 f"- Methodology gate: {maturity.get('methodology_gate', {}).get('note', 'Unknown')}",
+                f"- Self-evolution gate: {maturity.get('self_evolution_gate', {}).get('note', 'Unknown')}",
                 f"- Meaning: {maturity.get('era_description', 'Unknown')}",
                 "",
             ]
         )
+        if maturity.get("score_caps"):
+            lines.append("**Score Caps Applied**:")
+            for cap in maturity["score_caps"]:
+                lines.append(
+                    f"- `{cap.get('gate')}`: {cap.get('before')} -> {cap.get('after')}. {cap.get('reason')}"
+                )
+            lines.append("")
+        if maturity.get("signal_points"):
+            lines.extend(
+                [
+                    "### Positive Signal Ledger",
+                    "",
+                    "| Signal | Points | Evidence |",
+                    "|--------|--------|----------|",
+                ]
+            )
+            for signal in maturity["signal_points"]:
+                lines.append(
+                    f"| {_cell(signal.get('label', signal.get('key', 'unknown')))} | +{signal.get('points', 0)} | "
+                    f"{_refs(signal.get('evidence_refs', []))} |"
+                )
+            lines.append("")
+        if maturity.get("penalty_breakdown"):
+            lines.extend(
+                [
+                    "### Penalty Ledger",
+                    "",
+                    "| Finding | Severity | Penalty | Evidence | Fix Direction |",
+                    "|---------|----------|---------|----------|---------------|",
+                ]
+            )
+            for item in maturity["penalty_breakdown"]:
+                penalty = (
+                    f"-{item.get('total_penalty', 0)} "
+                    f"(rule {item.get('title_penalty', 0)} + severity {item.get('severity_penalty', 0)})"
+                )
+                fix = _cell(item.get("recommended_fix", ""))
+                if len(fix) > 180:
+                    fix = fix[:177] + "..."
+                lines.append(
+                    f"| {_cell(item.get('title', ''))} | {item.get('severity', '').upper()} | {penalty} | "
+                    f"{_refs(item.get('evidence_refs', []), limit=1)} | {fix or '-'} |"
+                )
+            lines.append("")
         if maturity.get("strengths"):
             lines.append("**Strengths**:")
             for strength in maturity["strengths"]:
@@ -109,6 +176,7 @@ def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) 
                     lines.append(line)
                 lines.append("")
 
+    penalty_lookup = _finding_penalty_lookup(maturity)
     for index, finding in enumerate(results.get("findings", []), start=1):
         severity = finding.get("severity", "low")
         lines.extend(
@@ -120,6 +188,9 @@ def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) 
         for key in ("symptom", "user_impact", "source_layer", "mechanism", "root_cause", "recommended_fix"):
             if finding.get(key):
                 lines.append(f"**{key.replace('_', ' ').title()}**: {finding[key]}")
+        score_impact = penalty_lookup.get(finding.get("title", ""), 0)
+        if score_impact:
+            lines.append(f"**Score Impact**: -{score_impact} points")
         if finding.get("evidence_refs"):
             lines.append("**Evidence**:")
             for ref in finding["evidence_refs"]:
@@ -131,7 +202,12 @@ def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) 
     if results.get("ordered_fix_plan"):
         lines.extend(["## Ordered Fix Plan", ""])
         for step in results["ordered_fix_plan"]:
-            lines.append(f"{step['order']}. **{step['goal']}** — {step['why_now']}")
+            score_impact = penalty_lookup.get(step.get("goal", ""), 0)
+            impact = f" Expected score recovery: up to +{score_impact}." if score_impact else ""
+            lines.append(
+                f"{step['order']}. **{step['goal']}** — {step['why_now']}"
+                f"{impact} Expected effect: {step.get('expected_effect', '')}"
+            )
         lines.append("")
 
     markdown = "\n".join(lines)

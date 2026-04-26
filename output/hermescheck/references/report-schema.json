@@ -60,12 +60,21 @@
       "required": [
         "score",
         "raw_points",
+        "capped_raw_points",
+        "pre_penalty_score",
         "penalty",
+        "uncapped_penalty",
+        "penalty_cap",
         "era_key",
         "era_name",
         "era_description",
         "share_line",
+        "score_formula",
+        "signal_points",
+        "penalty_breakdown",
+        "score_caps",
         "methodology_gate",
+        "self_evolution_gate",
         "strengths",
         "next_milestones",
         "evidence_refs"
@@ -74,7 +83,11 @@
       "properties": {
         "score": { "type": "integer", "minimum": 0, "maximum": 100 },
         "raw_points": { "type": "integer", "minimum": 0 },
+        "capped_raw_points": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "pre_penalty_score": { "type": "integer", "minimum": 0, "maximum": 100 },
         "penalty": { "type": "integer", "minimum": 0 },
+        "uncapped_penalty": { "type": "integer", "minimum": 0 },
+        "penalty_cap": { "type": "integer", "minimum": 0 },
         "era_key": {
           "type": "string",
           "enum": [
@@ -93,7 +106,79 @@
         },
         "era_description": { "type": "string", "minLength": 1 },
         "share_line": { "type": "string", "minLength": 1 },
+        "score_formula": { "type": "string", "minLength": 1 },
+        "signal_points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["key", "label", "points", "evidence_refs"],
+            "additionalProperties": false,
+            "properties": {
+              "key": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1 },
+              "points": { "type": "integer", "minimum": 0 },
+              "evidence_refs": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "penalty_breakdown": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "title",
+              "severity",
+              "source_layer",
+              "title_penalty",
+              "severity_penalty",
+              "total_penalty",
+              "evidence_refs",
+              "recommended_fix"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": "string", "minLength": 1 },
+              "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+              "source_layer": { "type": "string", "minLength": 1 },
+              "title_penalty": { "type": "integer", "minimum": 0 },
+              "severity_penalty": { "type": "integer", "minimum": 0 },
+              "total_penalty": { "type": "integer", "minimum": 0 },
+              "evidence_refs": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "recommended_fix": { "type": "string" }
+            }
+          }
+        },
+        "score_caps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["gate", "before", "after", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "gate": { "type": "string", "minLength": 1 },
+              "before": { "type": "integer", "minimum": 0 },
+              "after": { "type": "integer", "minimum": 0 },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
         "methodology_gate": {
+          "type": "object",
+          "required": ["detected", "cap_applied", "note"],
+          "additionalProperties": false,
+          "properties": {
+            "detected": { "type": "boolean" },
+            "cap_applied": { "type": "boolean" },
+            "note": { "type": "string", "minLength": 1 }
+          }
+        },
+        "self_evolution_gate": {
           "type": "object",
           "required": ["detected", "cap_applied", "note"],
           "additionalProperties": false,
@@ -154,6 +239,7 @@
               "tool_interpretation",
               "answer_shaping",
               "platform_rendering",
+              "token_usage",
               "fallback_loops",
               "persistence",
               "impression_memory",
@@ -162,7 +248,15 @@
               "os_memory",
               "os_scheduler",
               "os_syscall",
-              "os_vfs"
+              "os_vfs",
+              "stateful_recovery",
+              "llm_cli_workers",
+              "knowledge_retrieval",
+              "plugin_execution",
+              "remote_tools",
+              "pipeline_middleware",
+              "runtime_bug_inference",
+              "self_evolution"
             ]
           },
           "minItems": 1
@@ -229,6 +323,7 @@
               "prompt_tightening",
               "state_cleanup",
               "architecture_change",
+              "test_change",
               "configuration_change"
             ]
           },

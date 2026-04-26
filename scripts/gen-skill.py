@@ -150,9 +150,15 @@ Produces `audit_results.json` and `audit_report.md`.
 | 2 | Tool Enforcement Gap | high | "Must use tool X" in prompt but no code validation |
 | 3 | Hidden LLM Calls | high | Secret second-pass LLM calls in fallback/repair loops |
 | 4 | Unrestricted Code Execution | critical | exec(), eval(), subprocess(shell=True) without sandbox |
-| 5 | Memory Pattern Issues | medium | Unbounded context growth, missing TTL |
-| 6 | Output Pipeline Mutation | medium | Response transformation corrupting correct answers |
-| 7 | Missing Observability | medium | No tracing, logging, or cost tracking |
+| 5 | Static Bug Inference | high | Code-level bug patterns inferred without runtime execution |
+| 6 | Token Usage Budget | high | Large default context windows, full-history prompts, missing thrift controls |
+| 7 | Memory Lifecycle Governance | medium | Memory without types, lifecycle, retrieval budgets, decay, or evidence pointers |
+| 8 | RAG Pipeline Governance | medium | Retrieval without chunk, top-k, rerank, ingestion, or context budget controls |
+| 9 | Self-Evolution Capability | high | Learning loops without external signals, source reading, constraint fit, safe landing, or verification |
+| 10 | Loop Safety Budget | high | Tool/agent loops without max-iteration, retry budget, stuck-job, or duplicate-call controls |
+| 11 | Plugin / Remote Tool Boundary | high | Executable plugins and MCP/OpenAPI tools without sandbox, schema, allowlist, or approval boundaries |
+| 12 | Output Pipeline Mutation | medium | Response transformation corrupting correct answers |
+| 13 | Missing Observability | medium | No tracing, logging, cost tracking, or audit trail |
 
 ## Severity Model
 
@@ -180,6 +186,7 @@ Default fix order (code-first, not prompt-first):
 Reports follow a formal JSON Schema (see `references/report-schema.json`) with:
 - `overall_health`: critical_risk | high_risk | medium_risk | low_risk
 - `findings`: array of severity-ranked issues with evidence refs
+- `maturity_score`: positive signal ledger, penalty ledger, score formula, and expected recovery directions
 - `ordered_fix_plan`: prioritized fix steps with rationale
 
 ## Anti-Patterns to Avoid

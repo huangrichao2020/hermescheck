@@ -1,0 +1,64 @@
+{
+  "name": "hermescheck",
+  "displayName": "HermesCheck",
+  "description": "Run Hermes Agent architecture and runtime health checks from VS Code.",
+  "version": "1.1.2",
+  "publisher": "huangrichao2020",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huangrichao2020/hermescheck.git"
+  },
+  "homepage": "https://github.com/huangrichao2020/hermescheck",
+  "bugs": {
+    "url": "https://github.com/huangrichao2020/hermescheck/issues"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "hermes-agent",
+    "agent",
+    "architecture",
+    "audit",
+    "health-check",
+    "llm"
+  ],
+  "activationEvents": [
+    "onCommand:hermescheck.auditWorkspace"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "hermescheck.auditWorkspace",
+        "title": "HermesCheck: Audit Workspace"
+      }
+    ],
+    "configuration": {
+      "title": "HermesCheck",
+      "properties": {
+        "hermescheck.executable": {
+          "type": "string",
+          "default": "hermescheck",
+          "description": "Path to the hermescheck CLI executable."
+        },
+        "hermescheck.profile": {
+          "type": "string",
+          "default": "personal",
+          "enum": [
+            "personal",
+            "enterprise",
+            "personal_development",
+            "enterprise_production"
+          ],
+          "description": "Audit profile passed to hermescheck."
+        }
+      }
+    }
+  }
+}

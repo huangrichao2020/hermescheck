@@ -16,6 +16,7 @@ from hermescheck.config import (
 )
 from hermescheck.maturity import score_maturity
 from hermescheck.scanners import ScannerSpec, get_enabled_scanners
+from hermescheck.scanners.path_filters import DEFAULT_SKIP_DIRS, should_skip_path
 from hermescheck.self_review import normalize_self_review
 
 SEVERITY_BUCKETS = ("critical", "high", "medium", "low")
@@ -29,7 +30,7 @@ CHANNEL_HINTS = {
     "telegram": ("telegram",),
 }
 ENTRYPOINT_NAMES = ("main.py", "app.py", "server.py", "index.js", "main.ts", "server.ts", "cli.py")
-SCOPE_SKIP_DIRS = {".git", ".github", ".venv", "venv", "node_modules", "dist", "build", "__pycache__", "coverage"}
+SCOPE_SKIP_DIRS = DEFAULT_SKIP_DIRS | {".github"}
 
 
 def _read_text(path: Path) -> str:
@@ -40,8 +41,7 @@ def _read_text(path: Path) -> str:
 
 
 def _skip_scope_path(path: Path) -> bool:
-    lowered_parts = {part.lower() for part in path.parts}
-    return any(part in lowered_parts for part in SCOPE_SKIP_DIRS)
+    return should_skip_path(path, SCOPE_SKIP_DIRS)
 
 
 def _infer_entrypoints(target: Path) -> list[str]:
