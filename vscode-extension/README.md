@@ -14,6 +14,8 @@ opens the Markdown report inside VS Code when the scan completes.
 - Agent architecture issues such as hidden LLM calls, completion gaps, role-play handoff chains, and tool-enforcement gaps.
 - Token budget problems, including large default context windows and full-history prompt assembly without thrift controls.
 - Runtime safety risks such as loop budgets, daemon restart safety, plugin sandboxing, remote tool boundaries, and pipeline middleware integrity.
+- Observability quality issues such as runtime logs that do not capture before/after evidence, command results, verification, or changed artifacts.
+- Handoff and workbook gaps where logs exist but maintainers do not have startup, restart, validation, state-location, and known-trap guidance.
 - Score evidence through a positive signal ledger, penalty ledger, fix directions, and expected score recovery.
 
 ![HermesCheck Markdown audit report](images/audit-report.png)

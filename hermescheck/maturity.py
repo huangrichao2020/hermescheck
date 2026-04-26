@@ -172,7 +172,22 @@ SIGNAL_PATTERNS = {
         re.IGNORECASE,
     ),
     "observability": re.compile(
-        r"\b(?:trace|tracing|telemetry|span|eval|evaluation|reward|cost tracking)\b", re.IGNORECASE
+        r"\b(?:trace|tracing|telemetry|span|eval|evaluation|reward|cost tracking|logger|logging|"
+        r"audit[_ -]?log|event[_ -]?log|run[_ -]?log|operation[_ -]?log|heartbeat|status[_ -]?update)\b|"
+        r"(?:运行日志|审计日志|操作日志|事件日志|心跳|状态中转)",
+        re.IGNORECASE,
+    ),
+    "evidence_logging": re.compile(
+        r"\b(?:before[_ -]?after|before/after|evidence|evidence_refs?|changed_files?|commands?_run|"
+        r"stdout|stderr|exit[_ -]?code|returncode|diff|snapshot|verification|smoke[_ -]?test|"
+        r"health[_ -]?check|acceptance)\b|(?:前后对比|证据|验收|验证|烟测|健康检查|命令输出|退出码)",
+        re.IGNORECASE,
+    ),
+    "handoff_workbook": re.compile(
+        r"\b(?:handoff|hand[-_ ]?over|runbook|workbook|work[_ -]?manual|operations[_ -]?manual|"
+        r"playbook|sop|WORK_LOG|HANDOFF|postmortem|lesson learned)\b|"
+        r"(?:交接手册|工作手册|运维手册|接手手册|交接文档|工作日志|复盘|经验沉淀)",
+        re.IGNORECASE,
     ),
     "stateful_recovery": re.compile(
         r"\b(?:stateful agent|context replay|conversation replay|transcript replay|resumable run|"
@@ -250,6 +265,8 @@ SIGNAL_POINTS = {
     "remote_tool_boundary": 8,
     "middleware_observability": 7,
     "observability": 7,
+    "evidence_logging": 8,
+    "handoff_workbook": 6,
     "stateful_recovery": 10,
     "environment_state": 8,
     "llm_cli_workers": 8,
@@ -289,6 +306,8 @@ SIGNAL_LABELS = {
     "remote_tool_boundary": "remote tool boundary",
     "middleware_observability": "middleware observability",
     "observability": "traces/evals",
+    "evidence_logging": "before/after evidence logging",
+    "handoff_workbook": "handoff/workbook habit",
     "stateful_recovery": "stateful recovery",
     "environment_state": "environment-as-state",
     "llm_cli_workers": "LLM CLI workers",
@@ -322,6 +341,8 @@ MILESTONES = {
     "remote_tool_boundary": "给 MCP/OpenAPI 远程工具增加 server allowlist、auth、schema pinning、timeout 和高权限审批。",
     "middleware_observability": "给请求/响应 pipeline 增加顺序声明、raw/transformed 审计、失败策略和冲突测试。",
     "observability": "保留 traces/evals，让 agent 的进化可以被复盘和比较。",
+    "evidence_logging": "给每次行动留下 before/after evidence：前置状态、动作、stdout/stderr/exit code、变更文件和验证结果。",
+    "handoff_workbook": "把运行经验写成交接手册或工作手册：启动、重启、日志位置、状态文件、验收命令和常见坑。",
     "stateful_recovery": "把自动续接做成 Stateful Agent 契约：context replay + environment state + side-effect log + idempotent recovery。",
     "environment_state": "把 filesystem/server/workspace 状态纳入可验证状态模型，恢复时先读取现场再决定下一步。",
     "llm_cli_workers": "把 Qwen/Codex/Claude 等外部 CLI 当作 bounded worker process，而不是临时 shell 魔法。",
@@ -366,6 +387,8 @@ FINDING_PENALTIES = {
     "Large context window used as default token budget": 18,
     "Full-history prompt assembly lacks token budget": 14,
     "Token-efficient memory/skill reuse strategy missing": 16,
+    "Runtime logs lack before/after evidence": 10,
+    "Operational handoff/workbook habit missing": 8,
 }
 
 
@@ -535,6 +558,8 @@ def score_maturity(target: Path, findings: list[dict[str, Any]]) -> dict[str, An
             "middleware_observability",
             "semantic_vfs",
             "observability",
+            "evidence_logging",
+            "handoff_workbook",
             "external_signal",
             "dissection_learning",
             "pattern_extraction",

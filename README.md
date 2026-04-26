@@ -213,7 +213,7 @@ The Hermes-specific scanner runs alongside inherited architecture checks:
 - tool-enforcement gaps
 - output pipeline mutation
 - code execution risks
-- missing observability
+- missing observability, missing before/after evidence capture, and missing handoff/workbook habits
 - excessive agency controls in enterprise mode
 
 ## Profiles
