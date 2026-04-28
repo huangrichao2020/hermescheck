@@ -105,26 +105,27 @@ def scan_plugin_execution_policy(target: Path) -> List[Dict[str, Any]]:
     if refs["dynamic_exec"] and len(refs["sandbox"]) < 2:
         findings.append(
             {
-                "severity": "critical",
+                "severity": "medium",
                 "title": "Executable plugin system lacks sandbox policy",
                 "symptom": (
                     f"Detected executable plugin/function loading with {len(refs['dynamic_exec'])} dynamic execution "
                     f"markers, but only {len(refs['sandbox'])} sandbox or permission policy markers."
                 ),
                 "user_impact": (
-                    "A plugin system that executes arbitrary code can read files, install packages, call networks, or "
-                    "mutate state unless it is isolated and capability-scoped."
+                    "Dynamic plugin loading needs review, but regex matches for exec/import machinery are common in "
+                    "loaders and do not by themselves prove an unsafe runtime path."
                 ),
                 "source_layer": "plugin_execution",
                 "mechanism": "Repository scan for plugin/function loaders and dynamic exec/import paths versus sandbox policy signals.",
-                "root_cause": "Code-level extensibility appears to be exposed before defining plugin capabilities and isolation.",
+                "root_cause": "Code-level extensibility appears before its plugin trust boundary is easy to verify.",
                 "evidence_refs": _evidence(refs, "dynamic_exec", "plugin", "sandbox", "user_boundary"),
                 "confidence": 0.72,
                 "fix_type": "architecture_change",
                 "recommended_fix": (
-                    "Run executable plugins behind a policy boundary: sandbox or subprocess isolation, timeout/resource "
-                    "limits, explicit capabilities, read/write scopes, review/approval, and separate trust levels for "
-                    "system, admin, and user plugins."
+                    "Avoid blanket removal of Python builtins such as open(), getattr(), or __import__(), because that "
+                    "breaks normal plugins and third-party libraries. Gate truly dynamic compilation paths such as "
+                    "exec(), eval(), and compile(), then add path-scoped file access, explicit capabilities, timeout/"
+                    "resource limits, audit logs, and separate trust levels for system, admin, and user plugins."
                 ),
             }
         )

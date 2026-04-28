@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.5
+
+- Recalibrate static execution-risk findings so dangerous function and shell markers are medium-risk review items, not automatic critical failures.
+- Update plugin sandbox guidance to prefer scoped file, capability, timeout, resource, and audit policies over blanket removal of Python runtime helpers.
+- Reduce maturity-score penalties for regex-level high-agency and plugin-loader findings.
+
 ## 1.2.4
 
 - Align the core architecture checks with `agchk` 1.2.4.

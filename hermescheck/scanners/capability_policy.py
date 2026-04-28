@@ -123,7 +123,7 @@ def scan_capability_policy(target: Path) -> List[Dict[str, Any]]:
         policy_summary = ", ".join(sorted(present)) if present else "none"
         findings.append(
             {
-                "severity": "high" if present else "critical",
+                "severity": "high" if not present else "medium",
                 "title": "High-agency tools lack layered permission policy",
                 "symptom": (
                     f"Detected {len(capability_refs)} powerful tool/capability sites in an agent context, but only "

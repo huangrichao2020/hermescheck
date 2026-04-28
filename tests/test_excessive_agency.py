@@ -48,7 +48,7 @@ def test_enterprise_profile_requires_two_control_categories(tmp_path: Path) -> N
         for finding in results["findings"]
         if finding["title"] == "Privileged agent capabilities lack enterprise controls"
     )
-    assert finding["severity"] == "high"
+    assert finding["severity"] == "medium"
     assert "at least two" in finding["recommended_fix"]
 
 

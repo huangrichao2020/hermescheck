@@ -30,7 +30,8 @@ def test_run_audit_produces_schema_valid_report(tmp_path: Path) -> None:
     }
     assert results["scope"]["target_name"] == str(tmp_path)
     assert results["scope"]["layers_to_audit"]
-    assert results["severity_summary"]["critical"] >= 1
+    assert results["severity_summary"]["critical"] == 0
+    assert results["severity_summary"]["medium"] >= 1
     assert results["evidence_pack"]
 
 

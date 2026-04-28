@@ -40,7 +40,7 @@ def test_personal_profile_relaxes_common_prototyping_findings(tmp_path: Path) ->
     assert results["executive_verdict"]["overall_health"] == "acceptable"
 
 
-def test_enterprise_profile_keeps_strict_code_execution_defaults(tmp_path: Path) -> None:
+def test_enterprise_profile_treats_static_code_execution_as_medium_risk(tmp_path: Path) -> None:
     (tmp_path / "agent.py").write_text(
         "import subprocess\nsubprocess.run(command, shell=True)\n",
         encoding="utf-8",
@@ -53,6 +53,6 @@ def test_enterprise_profile_keeps_strict_code_execution_defaults(tmp_path: Path)
     )
 
     code_exec = _finding(results, "Unsafe code execution:")
-    assert code_exec["severity"] == "critical"
-    assert "replace with safe alternatives" in code_exec["recommended_fix"].lower()
-    assert results["executive_verdict"]["overall_health"] == "critical"
+    assert code_exec["severity"] == "medium"
+    assert "path scopes" in code_exec["recommended_fix"].lower()
+    assert results["executive_verdict"]["overall_health"] == "unstable"

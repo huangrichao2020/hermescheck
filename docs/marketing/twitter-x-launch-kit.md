@@ -12,7 +12,7 @@ freshness, gateway/tool boundaries, observability, and release evidence.
 
 ## Short Post
 
-`hermescheck` 1.2.4 is out.
+`hermescheck` 1.2.5 is out.
 
 It now treats restart continuity as a first-class agent architecture standard:
 
@@ -29,7 +29,7 @@ PyPI: https://pypi.org/project/hermescheck/
 
 ## Thread Draft
 
-1. `hermescheck` 1.2.4 is out. The core idea: stateful agents should be judged
+1. `hermescheck` 1.2.5 is out. The core idea: stateful agents should be judged
    like persistent runtimes, not just prompt wrappers.
 
 2. This release focuses on restart continuity. If an agent can restart itself,
@@ -54,4 +54,3 @@ PyPI: https://pypi.org/project/hermescheck/
 ## Hashtags
 
 `#AIagents` `#HermesAgent` `#OpenSource` `#AgentArchitecture`
-

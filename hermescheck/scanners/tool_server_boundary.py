@@ -145,7 +145,7 @@ def scan_tool_server_boundary(target: Path) -> List[Dict[str, Any]]:
     if refs["high_agency"] and refs["remote_tool"] and not refs["boundary_policy"]:
         findings.append(
             {
-                "severity": "critical",
+                "severity": "high",
                 "title": "High-agency remote tools lack approval boundary",
                 "symptom": "Detected remote tool integration near high-agency capability markers without visible approval controls.",
                 "user_impact": (

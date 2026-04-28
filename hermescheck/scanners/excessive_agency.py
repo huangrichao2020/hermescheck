@@ -77,7 +77,7 @@ def scan_excessive_agency(target: Path, config: AuditConfig) -> List[Dict[str, A
     if len(present_controls) >= config.profile.min_agency_controls:
         return []
 
-    severity = "critical" if len(present_controls) == 0 else "high"
+    severity = "medium"
     control_summary = ", ".join(sorted(present_controls)) if present_controls else "none"
     evidence_refs = capability_refs[:5]
     for refs in present_controls.values():
@@ -92,8 +92,9 @@ def scan_excessive_agency(target: Path, config: AuditConfig) -> List[Dict[str, A
                 f"{len(present_controls)} control categories were found ({control_summary})."
             ),
             "user_impact": (
-                "High-agency agents can execute commands, modify files, browse externally, or "
-                "send data without sufficient human oversight or containment."
+                "High-agency agents can execute commands, modify files, browse externally, or send data. Static "
+                "capability markers should trigger review, but they should not be treated as critical without a "
+                "confirmed unsafe dispatch path."
             ),
             "source_layer": "tool_execution",
             "mechanism": (
@@ -110,7 +111,8 @@ def scan_excessive_agency(target: Path, config: AuditConfig) -> List[Dict[str, A
             "recommended_fix": (
                 "For enterprise production, require at least two of the three control categories: "
                 "approval, sandbox, and allowlist. Approval should gate risky actions, sandbox "
-                "should isolate execution, and allowlists should constrain commands or paths."
+                "should isolate execution, and allowlists should constrain commands or paths. Keep routine runtime "
+                "capabilities available where needed; add scoped policy instead of blanket disabling."
             ),
         }
     ]

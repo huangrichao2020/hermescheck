@@ -159,7 +159,7 @@ def test_cli_can_fail_ci_on_severity_threshold(tmp_path: Path) -> None:
             "--profile",
             "enterprise",
             "--fail-on",
-            "high",
+            "medium",
         ],
         capture_output=True,
         text=True,

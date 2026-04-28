@@ -66,26 +66,27 @@ def _scan_file(fp: Path) -> List[Dict[str, Any]]:
             pattern_name = "subprocess(shell=True)"
 
         if pattern_name:
-            severity = (
-                "critical" if pattern_name in ("exec(", "eval(", "subprocess(shell=True)", "os.system(") else "high"
-            )
-
             findings.append(
                 {
-                    "severity": severity,
+                    "severity": "medium",
                     "title": f"Unsafe code execution: {pattern_name}",
                     "symptom": f"Found {pattern_name} at {fp.name}:{lineno}: {line.strip()[:100]}",
-                    "user_impact": "Arbitrary code execution from untrusted input can lead to full system compromise, data exfiltration, or remote code execution.",
+                    "user_impact": (
+                        "Dynamic execution is a real risk marker, but a static match alone does not prove a remotely "
+                        "exploitable path. Treat it as a medium-risk review item unless reachability, untrusted input, "
+                        "and missing isolation are all confirmed."
+                    ),
                     "source_layer": "code_execution",
                     "mechanism": f"Regex match for dangerous function: {pattern_name}",
-                    "root_cause": f"Use of {pattern_name} without proper input sanitization or sandboxing.",
+                    "root_cause": f"Use of {pattern_name} needs a trust-boundary review.",
                     "evidence_refs": [f"{fp}:{lineno}"],
                     "confidence": 0.65 if has_sandbox else 0.9,
                     "fix_type": "code_change",
                     "recommended_fix": (
-                        "Replace with safe alternatives: use ast.literal_eval instead of eval(), "
-                        "subprocess.run with list args instead of shell=True, or execute in an isolated sandbox "
-                        "(Docker, gVisor, nsjail) with resource limits and network disabled."
+                        "Do not feed untrusted input into exec/eval/compile/shell execution. Keep legitimate runtime "
+                        "helpers such as open(), getattr(), and imports available when plugins need them, but constrain "
+                        "them with path scopes, capability policy, timeout/resource limits, and audit logs. Prefer "
+                        "ast.literal_eval/json.loads or argv-list subprocess calls when they fit."
                     ),
                 }
             )
