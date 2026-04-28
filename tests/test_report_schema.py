@@ -61,6 +61,14 @@ def test_run_audit_can_include_target_agent_self_review(tmp_path: Path) -> None:
             "summary": "I parse my own source tree and know the router owns tool dispatch.",
             "claims": [{"title": "Router ownership is explicit", "evidence": "src/router.py"}],
             "risks": ["Completion closure is still manual"],
+            "conflicts": [
+                {
+                    "from_layer": "gateway",
+                    "to_layer": "cli",
+                    "conflict_type": "duplication",
+                    "note": "Two command registries can drift.",
+                }
+            ],
             "false_positive_notes": ["Provider files are intentional"],
             "improvement_plan": [
                 {"title": "Add impression cards", "recommendation": "Close file/index/card/pointer loop"}
@@ -72,3 +80,5 @@ def test_run_audit_can_include_target_agent_self_review(tmp_path: Path) -> None:
     assert validate_report(results) == []
     assert results["target_self_review"]["agent_name"] == "Hermes"
     assert results["target_self_review"]["claims"][0]["evidence"] == "src/router.py"
+    assert results["conflict_map"][0]["conflict_type"] == "duplication"
+    assert results["ordered_fix_plan"][0]["goal"].startswith("Resolve architecture conflict:")

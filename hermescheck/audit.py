@@ -136,16 +136,36 @@ def _build_executive_verdict(
     }
 
 
-def _build_fix_plan(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [
+def _build_conflict_map(self_review: Optional[dict[str, Any]]) -> list[dict[str, str]]:
+    if not self_review:
+        return []
+    normalized = normalize_self_review(self_review)
+    return list(normalized.get("conflicts", []))
+
+
+def _build_fix_plan(findings: list[dict[str, Any]], conflict_map: list[dict[str, str]]) -> list[dict[str, Any]]:
+    conflict_steps = [
         {
             "order": index,
+            "goal": f"Resolve architecture conflict: {conflict['note']}",
+            "why_now": (
+                "Target-agent self-review identified "
+                f"{conflict['conflict_type']} between {conflict['from_layer']} and {conflict['to_layer']}."
+            ),
+            "expected_effect": "Removes conflicting, duplicated, or contradictory architecture logic before regex findings.",
+        }
+        for index, conflict in enumerate(conflict_map, start=1)
+    ]
+    finding_steps = [
+        {
+            "order": index + len(conflict_steps),
             "goal": finding["title"],
             "why_now": f"{finding['severity'].upper()} findings should be handled before lower-severity work.",
             "expected_effect": finding.get("recommended_fix", ""),
         }
         for index, finding in enumerate(findings, start=1)
     ]
+    return conflict_steps + finding_steps
 
 
 def run_audit(
@@ -200,6 +220,9 @@ def run_audit(
             if layer not in audited_layers:
                 audited_layers.append(layer)
 
+    normalized_self_review = normalize_self_review(self_review) if self_review else None
+    conflict_map = _build_conflict_map(normalized_self_review)
+
     results = {
         "schema_version": "hermescheck.report.v1",
         "scan_metadata": {
@@ -221,11 +244,11 @@ def run_audit(
         "maturity_score": score_maturity(target, findings),
         "evidence_pack": _build_evidence_pack(target, findings),
         "findings": findings,
-        "conflict_map": [],
-        "ordered_fix_plan": _build_fix_plan(findings),
+        "conflict_map": conflict_map,
+        "ordered_fix_plan": _build_fix_plan(findings, conflict_map),
     }
-    if self_review:
-        results["target_self_review"] = normalize_self_review(self_review)
+    if normalized_self_review:
+        results["target_self_review"] = normalized_self_review
 
     if verbose:
         print(f"\n{'─' * 50}\n✅ Audit complete. Found {total_findings} issues in {duration:.1f}s:")

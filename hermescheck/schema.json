@@ -382,6 +382,7 @@
         "summary": { "type": "string", "minLength": 1 },
         "claims": { "$ref": "#/$defs/self_review_items" },
         "risks": { "$ref": "#/$defs/self_review_items" },
+        "conflicts": { "$ref": "#/properties/conflict_map" },
         "false_positive_notes": { "$ref": "#/$defs/self_review_items" },
         "improvement_plan": { "$ref": "#/$defs/self_review_items" },
         "confidence": { "type": "number", "minimum": 0, "maximum": 1 }

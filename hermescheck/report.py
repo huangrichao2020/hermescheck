@@ -62,6 +62,24 @@ def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) 
         lines.append(f"| {SEVERITY_EMOJI.get(severity, '')} {severity.upper()} | {summary.get(severity, 0)} |")
     lines.extend(["", f"**Total findings**: {sum(summary.values())}", ""])
 
+    if results.get("conflict_map"):
+        lines.extend(
+            [
+                "## Architecture Conflict Map",
+                "",
+                "These items come from the target agent's own self-review. They are prioritized ahead of static regex findings.",
+                "",
+                "| From | To | Type | Note |",
+                "|------|----|------|------|",
+            ]
+        )
+        for conflict in results["conflict_map"]:
+            lines.append(
+                f"| {_cell(conflict.get('from_layer', ''))} | {_cell(conflict.get('to_layer', ''))} | "
+                f"{_cell(conflict.get('conflict_type', ''))} | {_cell(conflict.get('note', ''))} |"
+            )
+        lines.append("")
+
     if maturity:
         lines.extend(
             [
@@ -157,17 +175,25 @@ def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) 
         for title, key in (
             ("Self-Claimed Architecture Strengths", "claims"),
             ("Self-Identified Risks", "risks"),
+            ("Self-Identified Architecture Conflicts", "conflicts"),
             ("Likely hermescheck False Positives", "false_positive_notes"),
             ("Target Agent Improvement Plan", "improvement_plan"),
         ):
             if self_review.get(key):
                 lines.append(f"**{title}**:")
                 for item in self_review[key]:
-                    line = f"- {item['title']}"
-                    if item.get("evidence"):
-                        line += f" Evidence: `{item['evidence']}`."
-                    if item.get("recommendation"):
-                        line += f" Recommendation: {item['recommendation']}"
+                    if key == "conflicts":
+                        line = (
+                            f"- [{item.get('conflict_type', 'contradiction')}] "
+                            f"{item.get('from_layer', 'self_review')} -> {item.get('to_layer', 'architecture')}: "
+                            f"{item.get('note', '')}"
+                        )
+                    else:
+                        line = f"- {item['title']}"
+                        if item.get("evidence"):
+                            line += f" Evidence: `{item['evidence']}`."
+                        if item.get("recommendation"):
+                            line += f" Recommendation: {item['recommendation']}"
                     lines.append(line)
                 lines.append("")
 

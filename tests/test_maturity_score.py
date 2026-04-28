@@ -214,7 +214,6 @@ def test_maturity_score_rewards_runtime_safety_governance(tmp_path: Path) -> Non
 
     score = score_maturity(tmp_path, findings=[])
 
-    assert "loop safety budget" in score["strengths"]
     assert "permission policy" in score["strengths"]
     assert "memory lifecycle governance" in score["strengths"]
     assert any("page table" in milestone for milestone in score["next_milestones"])

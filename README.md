@@ -205,7 +205,7 @@ The Hermes-specific scanner runs alongside inherited architecture checks:
 - impression/pointer memory gaps
 - role-play handoff chains
 - agent-OS architecture gaps, including Stateful Agent recovery
-- loop-safety budgets, daemon lifecycle controls, self-restart control-plane hazards, post-restart recent-session recall, capability policies, plugin sandboxing, remote tool boundaries, and pipeline middleware integrity
+- daemon lifecycle controls, self-restart control-plane hazards, post-restart recent-session recall, capability policies, plugin sandboxing, remote tool boundaries, and pipeline middleware integrity
 - LLM CLI worker contract gaps for Qwen/Codex/Claude-style process delegation, including raw-JSON stdin handoff
 - duplicated skills and SOPs
 - startup and runtime surface sprawl
@@ -243,6 +243,7 @@ Every scan produces:
 - `maturity_score`: architecture-era score, formula, positive signal ledger, penalty ledger, score caps, and share line
 - `evidence_pack`: compact evidence references
 - `findings`: severity-ranked issues with fixes
+- `conflict_map`: target-agent self-review of conflicting, duplicated, or contradictory architecture links
 - `ordered_fix_plan`: practical next steps
 
 Generate Markdown from a previous JSON report:

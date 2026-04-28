@@ -139,12 +139,6 @@ SCANNER_REGISTRY = [
         audited_layers=("os_memory", "os_scheduler", "os_syscall", "os_vfs", "stateful_recovery", "llm_cli_workers"),
     ),
     ScannerSpec(
-        slug="loop_safety",
-        name="Loop Safety Budget",
-        func=_adapt(scan_loop_safety),
-        audited_layers=("fallback_loops", "tool_execution", "os_scheduler"),
-    ),
-    ScannerSpec(
         slug="daemon_lifecycle",
         name="Daemon Lifecycle Safety",
         func=_adapt(scan_daemon_lifecycle),
@@ -258,7 +252,6 @@ def get_enabled_scanners(config: AuditConfig) -> list[ScannerSpec]:
             "impression_memory",
             "role_play_orchestration",
             "os_architecture",
-            "loop_safety",
             "daemon_lifecycle",
             "capability_policy",
             "plugin_execution_policy",

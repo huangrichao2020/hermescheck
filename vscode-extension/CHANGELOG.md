@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.6
+
+- Disable loop-safety static findings and keep the compatibility scanner as a no-op.
+- Promote target-agent self-review conflicts into the official `conflict_map`.
+- Prioritize conflicting, duplicated, or contradictory architecture links ahead of static regex findings in the fix plan.
+
 ## 1.2.5
 
 - Recalibrate static execution-risk findings so dangerous function and shell markers are medium-risk review items, not automatic critical failures.

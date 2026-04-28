@@ -9,7 +9,7 @@ Usage:
     print(generate_report(results))
 """
 
-__version__ = "1.2.5"
+__version__ = "1.2.6"
 
 from hermescheck.audit import run_audit, save_results
 from hermescheck.contribute import prepare_contribution_bundle, publish_bundle_to_upstream

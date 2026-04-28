@@ -107,6 +107,14 @@ def test_cli_accepts_target_agent_self_review(tmp_path: Path) -> None:
                 "summary": "I inspected my own workspace before hermescheck ran.",
                 "claims": ["The provider abstraction is intentional."],
                 "risks": ["Completion closure can stop too early."],
+                "conflicts": [
+                    {
+                        "from_layer": "scheduler",
+                        "to_layer": "session_memory",
+                        "type": "contradiction",
+                        "note": "Restart path and recent-session recall disagree.",
+                    }
+                ],
                 "false_positive_notes": ["Provider implementation is not hidden LLM usage."],
                 "improvement_plan": ["Add anchor and pointer registration."],
             }
@@ -140,7 +148,10 @@ def test_cli_accepts_target_agent_self_review(tmp_path: Path) -> None:
     data = json.loads(json_output.read_text(encoding="utf-8"))
     assert data["target_self_review"]["agent_name"] == "LocalAgent"
     assert str(self_review) in data["target_self_review"]["source"]
-    assert "Target Agent Self-Review" in report_output.read_text(encoding="utf-8")
+    markdown = report_output.read_text(encoding="utf-8")
+    assert data["conflict_map"][0]["from_layer"] == "scheduler"
+    assert "Architecture Conflict Map" in markdown
+    assert "Target Agent Self-Review" in markdown
 
 
 def test_cli_can_fail_ci_on_severity_threshold(tmp_path: Path) -> None:

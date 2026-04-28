@@ -77,11 +77,6 @@ SIGNAL_PATTERNS = {
     "fairness": re.compile(
         r"\b(?:time slice|timeslice|priority|budget|preempt|cancel|cancellation|backpressure|deadline)\b", re.IGNORECASE
     ),
-    "loop_safety": re.compile(
-        r"\b(?:loop[_ -]?detector|repetition[_ -]?detector|max[_ -]?(?:steps|turns|iterations|loops|retries)|"
-        r"retry[_ -]?budget|circuit[_ -]?breaker|same[_ -]?args|args[_ -]?hash|ask[_ -]?to[_ -]?continue)\b",
-        re.IGNORECASE,
-    ),
     "capability_table": re.compile(
         r"\b(?:syscall table|capability|capabilities|cap_[a-z0-9_]+|permission matrix|seccomp)\b", re.IGNORECASE
     ),
@@ -272,7 +267,6 @@ SIGNAL_POINTS = {
     "impression_pointer": 12,
     "scheduler": 8,
     "fairness": 8,
-    "loop_safety": 9,
     "capability_table": 8,
     "permission_policy": 9,
     "memory_lifecycle": 10,
@@ -316,7 +310,6 @@ SIGNAL_LABELS = {
     "impression_pointer": "impression pointers",
     "scheduler": "scheduler/workers",
     "fairness": "fair scheduling",
-    "loop_safety": "loop safety budget",
     "capability_table": "capability table",
     "permission_policy": "permission policy",
     "memory_lifecycle": "memory lifecycle governance",
@@ -353,7 +346,6 @@ MILESTONES = {
     "page_fault": "给被压缩或归档的细节加 page fault/deep-dive 恢复路径。",
     "impression_pointer": "把 impression cue 升级成 topic_anchor + semantic_hash + pointer_ref。",
     "fairness": "为 worker/tool/subagent 增加 priority、budget、cancel 和 backpressure。",
-    "loop_safety": "给 agent/tool loop 增加 max-iterations、重复工具调用检测、retry budget、timeout 和 ask-to-continue。",
     "capability_table": "把工具边界整理成 syscall/capability table，而不是散落在代码里。",
     "permission_policy": "把高权限工具纳入 blocklist、allowlist、needs-approval 和 read/write scope 的分层权限模型。",
     "memory_lifecycle": "给长期记忆增加类型、检索预算、冲突合并、active/durable 生命周期、衰减和证据指针。",
@@ -393,8 +385,6 @@ FINDING_PENALTIES = {
     "Impression pointers missing": 12,
     "Agent scheduler lacks fairness controls": 8,
     "Channel gateway lacks multi-worker responsiveness": 9,
-    "Agent/tool loop lacks loop safety budget": 10,
-    "Scheduled agent work lacks stuck-job controls": 7,
     "Tool syscalls lack explicit capability table": 8,
     "High-agency tools lack layered permission policy": 5,
     "Memory system lacks lifecycle governance": 10,
@@ -413,7 +403,6 @@ FINDING_PENALTIES = {
     "Self-restart can kill its own control plane": 25,
     "Restart recovery loses recent session memory": 17,
     "Permission policy is not enforced on all dispatch paths": 9,
-    "Loop detector does not observe all tool-call paths": 9,
     "Executable plugin system lacks sandbox policy": 4,
     "Plugin dependency installation lacks supply-chain policy": 8,
     "Remote tool server lacks trust-boundary policy": 9,
@@ -592,7 +581,6 @@ def score_maturity(target: Path, findings: list[dict[str, Any]]) -> dict[str, An
             "memory_retrieval_i18n",
             "rag_governance",
             "token_efficiency",
-            "loop_safety",
             "fairness",
             "capability_table",
             "permission_policy",
