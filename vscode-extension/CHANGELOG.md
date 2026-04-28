@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.4
+
+- Align the core architecture checks with `agchk` 1.2.4.
+- Add critical detection for self-restart paths that can kill their own control plane.
+- Add restart recent-session recall checks and maturity-score penalties.
+- Add memory active-rule GC, hands-on validation, and reusable assetization signals.
+
 ## 1.1.4
 
 - Add observability checks for before/after evidence capture in runtime logs.

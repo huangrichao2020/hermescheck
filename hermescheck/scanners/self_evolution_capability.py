@@ -55,6 +55,21 @@ SIGNAL_PATTERNS = {
         r"(?:验证闭环|回归测试|烟测|验收|复盘|教训)",
         re.IGNORECASE,
     ),
+    "hands_on_validation": re.compile(
+        r"\b(?:hands[_ -]?on|real[_ -]?world|live[_ -]?(?:run|test|endpoint|tool call)|"
+        r"end[_ -]?to[_ -]?end|e2e|practical[_ -]?(?:run|validation)|manual[_ -]?acceptance|"
+        r"worked example|validated with real|production[_ -]?like|satisfied)\b|"
+        r"(?:实战|跑通|真实(?:调用|端点|工具)|端到端|实际验证|真实验证|满意后|验满意)",
+        re.IGNORECASE,
+    ),
+    "learning_assetization": re.compile(
+        r"\b(?:asseti[sz]ation|crystalliz(?:e|es|ed|ing)|teachback|methodology artifact|"
+        r"skill package|skill card|procedure skill|impression fragment|impression snippet|"
+        r"memory imprint|lesson card|runbook artifact|reusable playbook)\b|"
+        r"(?:资产化|固化|沉淀|方法论.{0,24}技能.{0,24}印象|技能包|技能卡|印象片段|"
+        r"印象碎片|工作手册|交接手册|可复用流程)",
+        re.IGNORECASE,
+    ),
 }
 
 EVOLUTION_KEYS = (
@@ -64,6 +79,8 @@ EVOLUTION_KEYS = (
     "constraint_adaptation",
     "safe_landing",
     "verification_closure",
+    "hands_on_validation",
+    "learning_assetization",
 )
 
 
@@ -127,17 +144,19 @@ def scan_self_evolution_capability(target: Path) -> List[Dict[str, Any]]:
                 "severity": "high",
                 "title": "Agent lacks self-evolution capability",
                 "symptom": (
-                    f"Detected an agent runtime surface, but only {len(present)} of 6 evolution-loop stages "
+                    f"Detected an agent runtime surface, but only {len(present)} of {len(EVOLUTION_KEYS)} evolution-loop stages "
                     f"were visible ({present_summary})."
                 ),
                 "user_impact": (
                     "The agent can execute tasks, but it has no durable way to learn from external projects, extract "
-                    "patterns, adapt them to local constraints, land changes safely, and verify the result."
+                    "patterns, adapt them to local constraints, land changes safely, verify the result in practice, "
+                    "and turn the lesson into reusable methodology, skills, and impression fragments."
                 ),
                 "source_layer": "self_evolution",
                 "mechanism": (
                     "Repository scan for the evolution rhythm: external signal -> source dissection -> pattern "
-                    "extraction -> constraint adaptation -> small-step landing -> verification closure."
+                    "extraction -> constraint adaptation -> small-step landing -> verification closure -> "
+                    "hands-on validation -> reusable assetization."
                 ),
                 "root_cause": "The project appears to treat improvement as ad hoc development rather than a closed-loop capability.",
                 "evidence_refs": _evidence(refs, "agent_runtime", *EVOLUTION_KEYS),
@@ -146,7 +165,8 @@ def scan_self_evolution_capability(target: Path) -> List[Dict[str, Any]]:
                 "recommended_fix": (
                     "Add a lightweight self-evolution loop: define signal screening, source-level learning, pattern "
                     "extraction, local constraint adaptation, independent minimal modules, try/except or fail-soft "
-                    "integration, and a test/eval/retro closure for every learning cycle."
+                    "integration, test/eval/retro closure, a real hands-on validation run, and durable methodology, "
+                    "skill, and impression assets for every learning cycle."
                 ),
             }
         )
@@ -206,6 +226,55 @@ def scan_self_evolution_capability(target: Path) -> List[Dict[str, Any]]:
                 "recommended_fix": (
                     "Make every evolution cycle end with a verification artifact: focused regression test, smoke test, "
                     "eval, acceptance note, or retro that records what changed and what failed."
+                ),
+            }
+        )
+
+    if present and not refs["hands_on_validation"]:
+        findings.append(
+            {
+                "severity": "high",
+                "title": "Learning loop lacks hands-on validation",
+                "symptom": "Detected self-improvement or learning workflow signals without a real practice run.",
+                "user_impact": (
+                    "The agent may claim it learned a capability after reading docs or source, but without an actual "
+                    "live run it can preserve an untested story instead of an operational skill."
+                ),
+                "source_layer": "self_evolution",
+                "mechanism": "Repository scan for learning-loop signals versus hands-on, live endpoint, e2e, or real-tool validation language.",
+                "root_cause": "The learning workflow appears to stop at conceptual understanding or tests, not practical capability proof.",
+                "evidence_refs": _evidence(refs, *EVOLUTION_KEYS),
+                "confidence": 0.7,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Require every new capability to pass one realistic hands-on run before it is considered learned. "
+                    "Record the command, endpoint/tool used, result, failure mode, and acceptance note."
+                ),
+            }
+        )
+
+    if present and not refs["learning_assetization"]:
+        findings.append(
+            {
+                "severity": "high",
+                "title": "Learning loop lacks reusable assetization",
+                "symptom": "Detected self-improvement or learning workflow signals without methodology, skill, or impression asset closure.",
+                "user_impact": (
+                    "A successful one-off learning run can disappear after the session. The next agent may repeat the "
+                    "same exploration instead of directly recalling the verified procedure."
+                ),
+                "source_layer": "self_evolution",
+                "mechanism": (
+                    "Repository scan for learning-loop signals versus durable methodology artifacts, skill packages, "
+                    "runbooks, impression fragments, or memory imprints."
+                ),
+                "root_cause": "The learning workflow does not promote verified experience into reusable long-term assets.",
+                "evidence_refs": _evidence(refs, *EVOLUTION_KEYS),
+                "confidence": 0.72,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "After the hands-on run is accepted, produce three assets: a compact methodology, a reusable skill "
+                    "or runbook, and a short impression fragment with pointers back to the evidence."
                 ),
             }
         )

@@ -201,11 +201,11 @@ The Hermes-specific scanner runs alongside inherited architecture checks:
 - memory freshness confusion
 - memory lifecycle governance and CJK-safe retrieval paths
 - RAG retrieval governance and context-budget controls
-- self-evolution capability: external signals, source reading, pattern extraction, constraint adaptation, safe landing, and verification closure
+- self-evolution capability: external signals, source reading, pattern extraction, constraint adaptation, safe landing, verification closure, hands-on validation, and reusable assetization
 - impression/pointer memory gaps
 - role-play handoff chains
 - agent-OS architecture gaps, including Stateful Agent recovery
-- loop-safety budgets, daemon lifecycle controls, capability policies, plugin sandboxing, remote tool boundaries, and pipeline middleware integrity
+- loop-safety budgets, daemon lifecycle controls, self-restart control-plane hazards, post-restart recent-session recall, capability policies, plugin sandboxing, remote tool boundaries, and pipeline middleware integrity
 - LLM CLI worker contract gaps for Qwen/Codex/Claude-style process delegation, including raw-JSON stdin handoff
 - duplicated skills and SOPs
 - startup and runtime surface sprawl

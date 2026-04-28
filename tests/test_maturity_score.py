@@ -41,7 +41,7 @@ def test_maturity_score_rewards_agent_os_primitives(tmp_path: Path) -> None:
                 "syscall table with capabilities and permission matrix",
                 "permission policy uses blocklist, allowlist, needs_approval, read_scope, write_scope, and temp_scope",
                 "memory_type identity preference goal habit decision constraint episode reflection with top_k retrieval_budget confidence overlap dedupe active durable ttl decay",
-                "external signal intake reads upstream issues PRs benchmarks and user feedback; source-level learning reads directory tree entrypoint main loop core class ADR and boundary analysis; pattern extraction turns design patterns into reusable patterns not copied code; constraint adaptation checks local constraints zero heavy dependencies lightweight 2GB RAM fit; small-step landing uses independent modules try/except fail-soft rollback; verification loop runs regression test smoke test acceptance and retro",
+                "external signal intake reads upstream issues PRs benchmarks and user feedback; source-level learning reads directory tree entrypoint main loop core class ADR and boundary analysis; pattern extraction turns design patterns into reusable patterns not copied code; constraint adaptation checks local constraints zero heavy dependencies lightweight 2GB RAM fit; small-step landing uses independent modules try/except fail-soft rollback; verification loop runs regression test smoke test acceptance and retro; hands-on live tool call validates the real endpoint; the lesson is crystallized into a methodology artifact, procedure skill, and impression fragment",
                 "semantic VFS mount point /knowledge/docs and /skills resource path",
                 "trace spans, eval, reward, telemetry",
             ]
@@ -153,6 +153,52 @@ def test_maturity_score_penalizes_architecture_findings(tmp_path: Path) -> None:
     assert score["score_formula"]
 
 
+def test_maturity_score_heavily_penalizes_suicidal_self_restart(tmp_path: Path) -> None:
+    (tmp_path / "agent_os.md").write_text(
+        "\n".join(
+            [
+                "methodology: always-on gateway runtime safety checklist",
+                "agent loop harness with tool_call and function_call",
+                "graceful_restart drain active_agents checkpoint resume post_restart health_check",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    findings = [
+        {"title": "Self-restart can kill its own control plane", "severity": "critical"},
+    ]
+
+    score = score_maturity(tmp_path, findings=findings)
+
+    penalties = {item["title"]: item for item in score["penalty_breakdown"]}
+    assert penalties["Self-restart can kill its own control plane"]["title_penalty"] == 25
+    assert penalties["Self-restart can kill its own control plane"]["severity_penalty"] == 12
+    assert penalties["Self-restart can kill its own control plane"]["total_penalty"] == 37
+    assert score["score"] <= score["pre_penalty_score"] - 37
+
+
+def test_maturity_score_penalizes_restart_without_recent_session_recall(tmp_path: Path) -> None:
+    (tmp_path / "agent_os.md").write_text(
+        "\n".join(
+            [
+                "methodology: always-on gateway runtime safety checklist",
+                "agent loop harness with session history, memory, checkpoint, resume, and post_restart health_check",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    findings = [
+        {"title": "Restart recovery loses recent session memory", "severity": "high"},
+    ]
+
+    score = score_maturity(tmp_path, findings=findings)
+
+    penalties = {item["title"]: item for item in score["penalty_breakdown"]}
+    assert penalties["Restart recovery loses recent session memory"]["title_penalty"] == 17
+    assert penalties["Restart recovery loses recent session memory"]["severity_penalty"] == 5
+    assert penalties["Restart recovery loses recent session memory"]["total_penalty"] == 22
+
+
 def test_maturity_score_rewards_runtime_safety_governance(tmp_path: Path) -> None:
     (tmp_path / "runtime_safety.md").write_text(
         "\n".join(
@@ -180,6 +226,7 @@ def test_maturity_score_rewards_stateful_agent_primitives(tmp_path: Path) -> Non
             [
                 "methodology: recovery rubric for Stateful Agent runtime behavior",
                 "context replay restores conversation history after an interrupted run",
+                "restart recall loads recent session history after cold start and injects it as background context",
                 "environment is the state: filesystem state, workspace state, and server state are inspected first",
                 "side-effect log stores tool result and command output for idempotent recovery checkpoints",
             ]
@@ -190,6 +237,7 @@ def test_maturity_score_rewards_stateful_agent_primitives(tmp_path: Path) -> Non
     score = score_maturity(tmp_path, findings=[])
 
     assert "stateful recovery" in score["strengths"]
+    assert "restart session recall" in score["strengths"]
     assert "environment-as-state" in score["strengths"]
 
 
@@ -256,6 +304,8 @@ def test_maturity_score_rewards_self_evolution_loop(tmp_path: Path) -> None:
                 "constraint adaptation checks local constraints, zero heavy dependencies, lightweight fit, and 2GB RAM",
                 "small-step landing uses independent modules, try/except, fail-soft integration, and rollback",
                 "verification loop runs regression test, smoke test, acceptance, and retro",
+                "hands-on validation runs a live tool call against a real endpoint",
+                "learning assetization crystallizes the result into a methodology artifact, procedure skill, and impression fragment",
             ]
         ),
         encoding="utf-8",
@@ -268,3 +318,5 @@ def test_maturity_score_rewards_self_evolution_loop(tmp_path: Path) -> None:
     assert "self-evolution loop" in score["strengths"]
     assert "external signal intake" in score["strengths"]
     assert "verification closure" in score["strengths"]
+    assert "hands-on validation" in score["strengths"]
+    assert "learning assetization" in score["strengths"]

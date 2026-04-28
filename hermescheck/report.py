@@ -19,10 +19,7 @@ def _cell(value: Any) -> str:
 
 
 def _finding_penalty_lookup(maturity: Dict[str, Any]) -> dict[str, int]:
-    return {
-        item.get("title", ""): item.get("total_penalty", 0)
-        for item in maturity.get("penalty_breakdown", [])
-    }
+    return {item.get("title", ""): item.get("total_penalty", 0) for item in maturity.get("penalty_breakdown", [])}
 
 
 def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) -> str:
@@ -87,9 +84,7 @@ def generate_report(results: Dict[str, Any], output_file: Optional[str] = None) 
         if maturity.get("score_caps"):
             lines.append("**Score Caps Applied**:")
             for cap in maturity["score_caps"]:
-                lines.append(
-                    f"- `{cap.get('gate')}`: {cap.get('before')} -> {cap.get('after')}. {cap.get('reason')}"
-                )
+                lines.append(f"- `{cap.get('gate')}`: {cap.get('before')} -> {cap.get('after')}. {cap.get('reason')}")
             lines.append("")
         if maturity.get("signal_points"):
             lines.extend(

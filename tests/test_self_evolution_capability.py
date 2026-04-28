@@ -80,12 +80,58 @@ def test_self_evolution_accepts_closed_loop_methodology(tmp_path: Path) -> None:
                 "Constraint adaptation checks local constraints, zero heavy dependencies, lightweight fit, and 2GB RAM.",
                 "Small-step landing uses an independent module, try/except, fail-soft integration, and rollback.",
                 "Every change ends with a verification loop, regression test, smoke test, acceptance, and retro.",
+                "The new capability must pass a hands-on live tool call against a real endpoint before it is accepted.",
+                "After manual acceptance, the lesson is crystallized into a methodology artifact, procedure skill, and impression fragment.",
             ]
         ),
         encoding="utf-8",
     )
 
     assert scan_self_evolution_capability(tmp_path) == []
+
+
+def test_self_evolution_flags_learning_without_hands_on_validation(tmp_path: Path) -> None:
+    (tmp_path / "evolution.md").write_text(
+        "\n".join(
+            [
+                "Agent runtime: agent loop, tool_call, memory, scheduler, LLM.",
+                "External signal intake watches upstream projects, issues, PRs, benchmarks, and user feedback.",
+                "Source-level learning reads the directory tree, entrypoint, main loop, core class, ADR, and design doc.",
+                "Pattern extraction turns each design pattern into a reusable pattern, not a code copy.",
+                "Constraint adaptation checks local constraints, zero heavy dependencies, lightweight fit, and 2GB RAM.",
+                "Small-step landing uses an independent module, try/except, fail-soft integration, and rollback.",
+                "Every change ends with a verification loop, regression test, smoke test, acceptance, and retro.",
+                "After acceptance, the lesson is crystallized into a methodology artifact, procedure skill, and impression fragment.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_self_evolution_capability(tmp_path)
+
+    assert "Learning loop lacks hands-on validation" in _titles(findings)
+
+
+def test_self_evolution_flags_learning_without_assetization(tmp_path: Path) -> None:
+    (tmp_path / "evolution.md").write_text(
+        "\n".join(
+            [
+                "Agent runtime: agent loop, tool_call, memory, scheduler, LLM.",
+                "External signal intake watches upstream projects, issues, PRs, benchmarks, and user feedback.",
+                "Source-level learning reads the directory tree, entrypoint, main loop, core class, ADR, and design doc.",
+                "Pattern extraction turns each design pattern into a reusable pattern, not a code copy.",
+                "Constraint adaptation checks local constraints, zero heavy dependencies, lightweight fit, and 2GB RAM.",
+                "Small-step landing uses an independent module, try/except, fail-soft integration, and rollback.",
+                "Every change ends with a verification loop, regression test, smoke test, acceptance, and retro.",
+                "The new capability must pass a hands-on live tool call against a real endpoint before it is accepted.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_self_evolution_capability(tmp_path)
+
+    assert "Learning loop lacks reusable assetization" in _titles(findings)
 
 
 def test_self_evolution_scanner_is_enabled_in_personal_audits(tmp_path: Path) -> None:

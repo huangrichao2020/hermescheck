@@ -148,6 +148,21 @@ SIGNAL_PATTERNS = {
         r"(?:验证闭环|回归测试|烟测|验收|复盘|教训)",
         re.IGNORECASE,
     ),
+    "hands_on_validation": re.compile(
+        r"\b(?:hands[_ -]?on|real[_ -]?world|live[_ -]?(?:run|test|endpoint|tool call)|"
+        r"end[_ -]?to[_ -]?end|e2e|practical[_ -]?(?:run|validation)|manual[_ -]?acceptance|"
+        r"worked example|validated with real|production[_ -]?like|satisfied)\b|"
+        r"(?:实战|跑通|真实(?:调用|端点|工具)|端到端|实际验证|真实验证|满意后|验满意)",
+        re.IGNORECASE,
+    ),
+    "learning_assetization": re.compile(
+        r"\b(?:asseti[sz]ation|crystalliz(?:e|es|ed|ing)|teachback|methodology artifact|"
+        r"skill package|skill card|procedure skill|impression fragment|impression snippet|"
+        r"memory imprint|lesson card|runbook artifact|reusable playbook)\b|"
+        r"(?:资产化|固化|沉淀|方法论.{0,24}技能.{0,24}印象|技能包|技能卡|印象片段|"
+        r"印象碎片|工作手册|交接手册|可复用流程)",
+        re.IGNORECASE,
+    ),
     "semantic_vfs": re.compile(
         r"\b(?:vfs|virtual file|mount point|resource path|semantic fs|/knowledge|/skills|/memory)\b", re.IGNORECASE
     ),
@@ -196,6 +211,15 @@ SIGNAL_PATTERNS = {
         r"(?:Stateful Agent|上下文回放|录像带|自动续接|唤醒指令|中断恢复|幂等恢复|恢复检查点)",
         re.IGNORECASE,
     ),
+    "restart_session_recall": re.compile(
+        r"\b(?:restart[_ -]?recall|startup[_ -]?recall|cold[-_ ]?start[_ -]?(?:recall|context)|"
+        r"post[_ -]?restart[_ -]?(?:recall|memory|context)|recent[_ -]?(?:session|conversation|chat|"
+        r"history|transcript)[_ -]?(?:recall|context|replay)|load[_ -]?recent[_ -]?(?:sessions|"
+        r"history|messages)|list_recent_sessions|get_session_messages)\b|"
+        r"(?:重启恢复.{0,24}(?:会话|记忆|上下文)|启动恢复.{0,24}(?:会话|记忆|上下文)|"
+        r"最近.{0,12}会话.{0,12}(?:恢复|召回|注入)|近期.{0,12}会话.{0,12}(?:恢复|召回|注入))",
+        re.IGNORECASE,
+    ),
     "environment_state": re.compile(
         r"\b(?:environment state|environment is the state|filesystem state|file system state|workspace state|"
         r"working tree|server state|durable filesystem|durable workspace|persistent workspace|on-disk state|"
@@ -231,6 +255,8 @@ EVOLUTION_SIGNAL_KEYS = (
     "constraint_adaptation",
     "safe_landing",
     "verification_closure",
+    "hands_on_validation",
+    "learning_assetization",
 )
 
 SIGNAL_POINTS = {
@@ -259,6 +285,8 @@ SIGNAL_POINTS = {
     "constraint_adaptation": 5,
     "safe_landing": 5,
     "verification_closure": 6,
+    "hands_on_validation": 6,
+    "learning_assetization": 7,
     "semantic_vfs": 8,
     "daemon_lifecycle": 7,
     "plugin_sandbox": 8,
@@ -268,6 +296,7 @@ SIGNAL_POINTS = {
     "evidence_logging": 8,
     "handoff_workbook": 6,
     "stateful_recovery": 10,
+    "restart_session_recall": 12,
     "environment_state": 8,
     "llm_cli_workers": 8,
     "task_envelope": 7,
@@ -300,6 +329,8 @@ SIGNAL_LABELS = {
     "constraint_adaptation": "constraint adaptation",
     "safe_landing": "small-step landing",
     "verification_closure": "verification closure",
+    "hands_on_validation": "hands-on validation",
+    "learning_assetization": "learning assetization",
     "semantic_vfs": "semantic VFS",
     "daemon_lifecycle": "daemon lifecycle safety",
     "plugin_sandbox": "plugin sandbox policy",
@@ -309,6 +340,7 @@ SIGNAL_LABELS = {
     "evidence_logging": "before/after evidence logging",
     "handoff_workbook": "handoff/workbook habit",
     "stateful_recovery": "stateful recovery",
+    "restart_session_recall": "restart session recall",
     "environment_state": "environment-as-state",
     "llm_cli_workers": "LLM CLI workers",
     "task_envelope": "task envelope",
@@ -328,13 +360,17 @@ MILESTONES = {
     "memory_retrieval_i18n": "给 FTS/SQLite 记忆检索增加 CJK-safe tokenizer、fallback、reindex 和多语言回归测试。",
     "rag_governance": "给 RAG 增加 chunk、retrieval budget、rerank、ingestion 状态和 full-context 预算约束。",
     "token_efficiency": "学习 GenericAgent 的省 token 路线：<30K 热上下文、分层记忆、skill 复用、top-k/page-table 召回和成本指标。",
-    "self_evolution_loop": "建立自我进化闭环：外部信号、源码解剖、模式提取、约束适配、小步落地和验证复盘。",
+    "self_evolution_loop": (
+        "建立自我进化闭环：外部信号、源码解剖、模式提取、约束适配、小步落地、验证复盘、实战跑通和资产化沉淀。"
+    ),
     "external_signal": "建立外部信号筛选，只学习能解决当前未解决问题的项目、issue、PR、benchmark 或线上反馈。",
     "dissection_learning": "把学习对象读到源码层：目录结构、入口、主循环、核心类、ADR/DESIGN 和模块边界。",
     "pattern_extraction": "把学到的内容提炼成可复用设计模式，而不是复制代码或追逐新技术名词。",
     "constraint_adaptation": "每个模式先过本地约束：资源预算、零重型依赖、已有架构、权限边界和维护成本。",
     "safe_landing": "先做独立最小实现，用 try/except、feature flag 或 fail-soft 边界保护主循环。",
     "verification_closure": "每轮进化必须留下测试、eval、smoke、验收或复盘证据，证明它真的变好。",
+    "hands_on_validation": "学会新能力后必须实战跑通：真实端点、真实工具或端到端场景验证，而不是只读文档。",
+    "learning_assetization": "满意后把经验资产化：沉淀方法论、可复用 skill/runbook、印象片段和证据指针。",
     "semantic_vfs": "把 skills、RAG、docs、GitHub、notes 挂到统一 semantic VFS 地址空间。",
     "daemon_lifecycle": "给常驻 agent 增加 active-work 检查、graceful drain、checkpoint/resume 和 post-restart health 验证。",
     "plugin_sandbox": "给可执行插件增加 sandbox、依赖 pin/allowlist、权限 scope 和用户/管理员信任边界。",
@@ -344,6 +380,7 @@ MILESTONES = {
     "evidence_logging": "给每次行动留下 before/after evidence：前置状态、动作、stdout/stderr/exit code、变更文件和验证结果。",
     "handoff_workbook": "把运行经验写成交接手册或工作手册：启动、重启、日志位置、状态文件、验收命令和常见坑。",
     "stateful_recovery": "把自动续接做成 Stateful Agent 契约：context replay + environment state + side-effect log + idempotent recovery。",
+    "restart_session_recall": "把重启恢复升级成近期会话召回：冷启动后读最近几次会话，只作为背景恢复包注入，不当作新指令。",
     "environment_state": "把 filesystem/server/workspace 状态纳入可验证状态模型，恢复时先读取现场再决定下一步。",
     "llm_cli_workers": "把 Qwen/Codex/Claude 等外部 CLI 当作 bounded worker process，而不是临时 shell 魔法。",
     "task_envelope": "用 Task JSON + stdout/stderr/exit code + timeout/concurrency 控制定义 CLI worker 的输入输出契约。",
@@ -355,11 +392,13 @@ FINDING_PENALTIES = {
     "Impression memory layer missing": 10,
     "Impression pointers missing": 12,
     "Agent scheduler lacks fairness controls": 8,
+    "Channel gateway lacks multi-worker responsiveness": 9,
     "Agent/tool loop lacks loop safety budget": 10,
     "Scheduled agent work lacks stuck-job controls": 7,
     "Tool syscalls lack explicit capability table": 8,
     "High-agency tools lack layered permission policy": 10,
     "Memory system lacks lifecycle governance": 10,
+    "Memory retention lacks active-rule GC policy": 9,
     "Memory FTS lacks CJK-safe retrieval path": 9,
     "Memory retrieval lacks multilingual regression tests": 5,
     "RAG pipeline lacks retrieval governance": 9,
@@ -367,8 +406,12 @@ FINDING_PENALTIES = {
     "Agent lacks self-evolution capability": 12,
     "Evolution process lacks constraint adaptation": 7,
     "Evolution loop lacks verification closure": 10,
+    "Learning loop lacks hands-on validation": 10,
+    "Learning loop lacks reusable assetization": 9,
     "Knowledge surfaces lack semantic VFS": 7,
     "Daemon restart lacks active-work drain protocol": 9,
+    "Self-restart can kill its own control plane": 25,
+    "Restart recovery loses recent session memory": 17,
     "Permission policy is not enforced on all dispatch paths": 9,
     "Loop detector does not observe all tool-call paths": 9,
     "Executable plugin system lacks sandbox policy": 10,
@@ -540,6 +583,7 @@ def score_maturity(target: Path, findings: list[dict[str, Any]]) -> dict[str, An
             "paging",
             "page_fault",
             "stateful_recovery",
+            "restart_session_recall",
             "environment_state",
             "llm_cli_workers",
             "task_envelope",
@@ -566,6 +610,8 @@ def score_maturity(target: Path, findings: list[dict[str, Any]]) -> dict[str, An
             "constraint_adaptation",
             "safe_landing",
             "verification_closure",
+            "hands_on_validation",
+            "learning_assetization",
         )
         if (key != "self_evolution_loop" and key not in detected)
         or (key == "self_evolution_loop" and not has_self_evolution)

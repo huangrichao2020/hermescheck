@@ -1,12 +1,14 @@
 # Release Process
 
-`hermescheck` releases should publish three things together:
+`hermescheck` releases should publish four things together:
 
 - a PyPI package
 - a GitHub Release with generated notes
+- a checked-in release note under `docs/releases/`
+- a Twitter/X posting draft under `docs/marketing/`
 - public contributor credit for the people who moved the standard forward
 
-GitHub's generated release notes include merged pull requests, contributors, and a full changelog link. `hermescheck` customizes those notes with `.github/release.yml` so changes are grouped around the project mission: agent intelligence standards, scanner signals, contribution flow, docs, and release infrastructure.
+GitHub's generated release notes include merged pull requests, contributors, and a full changelog link. `hermescheck` customizes those notes with `.github/release.yml` so changes are grouped around the project mission: Hermes Agent architecture standards, scanner signals, contribution flow, docs, and release infrastructure.
 
 ## Release Checklist
 
@@ -31,8 +33,8 @@ GitHub's generated release notes include merged pull requests, contributors, and
 ```bash
 git switch main
 git pull --ff-only
-git tag v0.2.0
-git push origin v0.2.0
+git tag v1.2.4
+git push origin v1.2.4
 ```
 
 ## PR Requirements For Good Release Notes
