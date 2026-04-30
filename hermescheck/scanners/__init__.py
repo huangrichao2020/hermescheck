@@ -17,6 +17,7 @@ from hermescheck.scanners.hermes_contract import scan_hermes_contract
 from hermescheck.scanners.hidden_llm import scan_hidden_llm_calls
 from hermescheck.scanners.impression_memory import scan_impression_memory
 from hermescheck.scanners.internal_orchestration import scan_internal_orchestration
+from hermescheck.scanners.knowledge_consistency import scan_knowledge_consistency
 from hermescheck.scanners.loop_safety import scan_loop_safety
 from hermescheck.scanners.memory_freshness import scan_memory_freshness
 from hermescheck.scanners.memory_lifecycle import scan_memory_lifecycle
@@ -125,6 +126,12 @@ SCANNER_REGISTRY = [
         name="Impression Pointer Memory",
         func=_adapt(scan_impression_memory),
         audited_layers=("impression_memory", "active_recall"),
+    ),
+    ScannerSpec(
+        slug="knowledge_consistency",
+        name="Knowledge Consistency",
+        func=_adapt(scan_knowledge_consistency),
+        audited_layers=("knowledge_consistency", "long_term_memory", "active_recall"),
     ),
     ScannerSpec(
         slug="role_play_orchestration",
@@ -250,6 +257,7 @@ def get_enabled_scanners(config: AuditConfig) -> list[ScannerSpec]:
             "rag_pipeline_governance",
             "self_evolution_capability",
             "impression_memory",
+            "knowledge_consistency",
             "role_play_orchestration",
             "os_architecture",
             "daemon_lifecycle",
@@ -289,6 +297,7 @@ __all__ = [
     "scan_hidden_llm_calls",
     "scan_impression_memory",
     "scan_internal_orchestration",
+    "scan_knowledge_consistency",
     "scan_loop_safety",
     "scan_memory_freshness",
     "scan_memory_lifecycle",

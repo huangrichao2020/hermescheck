@@ -90,34 +90,47 @@ def scan_hidden_llm_calls(target: Path) -> List[Dict[str, Any]]:
     for fp, lineno, snippet in llm_call_sites:
         findings.append(
             {
-                "severity": "high",
+                "severity": "medium",
                 "title": "Hidden or secondary LLM call detected",
                 "symptom": f"LLM API call found at {fp.name}:{lineno}: {snippet}",
-                "user_impact": "Secondary LLM calls may bypass tool restrictions, safety checks, or cost controls defined in the main agent loop.",
+                "user_impact": (
+                    "Secondary LLM calls can bypass tool restrictions, safety checks, or cost controls if they are real "
+                    "runtime paths rather than provider wrappers or test helpers."
+                ),
                 "source_layer": "llm_routing",
-                "mechanism": "Regex match for LLM call pattern outside main agent loop file.",
-                "root_cause": "Additional LLM invocations exist outside the primary orchestration path, potentially unguarded.",
+                "mechanism": "Heuristic match for LLM call patterns outside recognized main-loop or provider files.",
+                "root_cause": "The project may have additional LLM invocations whose relationship to the main loop is unclear.",
                 "evidence_refs": [f"{fp}:{lineno}"],
-                "confidence": 0.8,
+                "confidence": 0.62,
                 "fix_type": "code_change",
-                "recommended_fix": "Consolidate all LLM calls through the main agent loop. If a secondary call is intentional, add explicit documentation, guardrails, and cost tracking.",
+                "recommended_fix": (
+                    "Ask the target agent to explain whether this call is a provider wrapper, a test fixture, a repair "
+                    "pass, or a true second brain. Consolidate only true runtime bypasses; otherwise document the path "
+                    "and inherited guardrails."
+                ),
             }
         )
 
     if not has_main_loop and llm_call_sites:
         findings.append(
             {
-                "severity": "high",
+                "severity": "medium",
                 "title": "No main agent loop pattern found",
                 "symptom": "LLM calls detected but no recognized main loop (agent_loop, main_loop, orchestrator, chain_run) pattern.",
-                "user_impact": "Without a clear orchestration loop, LLM calls may be scattered and uncoordinated, making it hard to enforce tool policies or cost limits.",
+                "user_impact": (
+                    "Without a documented orchestration loop, audit readers may not know whether LLM calls are scattered "
+                    "or simply organized under names hermescheck does not recognize."
+                ),
                 "source_layer": "llm_routing",
-                "mechanism": "No match for main loop patterns (agent.*loop, main.*loop, orchestrat, chain.*run).",
-                "root_cause": "Missing or non-standard agent orchestration structure.",
+                "mechanism": "No heuristic match for main loop patterns (agent.*loop, main.*loop, orchestrat, chain.*run).",
+                "root_cause": "The main agent loop may be missing, non-standard, or documented outside scanned files.",
                 "evidence_refs": [f"{fp}:{lineno}" for fp, lineno, _ in llm_call_sites],
-                "confidence": 0.7,
+                "confidence": 0.56,
                 "fix_type": "code_change",
-                "recommended_fix": "Implement a clear main agent loop that centralizes all LLM invocations, tool routing, and policy enforcement.",
+                "recommended_fix": (
+                    "Ask the target agent to point to the entrypoint that owns LLM invocation, tool routing, and policy "
+                    "checks. Add a short architecture note before refactoring any non-standard but intentional layout."
+                ),
             }
         )
 

@@ -91,25 +91,28 @@ def scan_pipeline_middleware_integrity(target: Path) -> List[Dict[str, Any]]:
     if refs["mutation"] and not refs["audit"]:
         findings.append(
             {
-                "severity": "high",
+                "severity": "medium",
                 "title": "LLM pipeline mutates messages without audit trail",
                 "symptom": (
                     "Detected request/response pipeline mutation such as sanitize, translate, redact, rewrite, or prompt "
                     "injection without visible raw/transformed audit logging."
                 ),
                 "user_impact": (
-                    "Users and maintainers cannot tell whether an answer came from the model, a filter, a translation "
-                    "step, or a prompt-injection middleware."
+                    "Users and maintainers may not be able to tell whether an answer came from the model, a filter, a "
+                    "translation step, or a prompt-injection middleware."
                 ),
                 "source_layer": "pipeline_middleware",
-                "mechanism": "Repository scan for LLM middleware and mutation filters versus raw/transformed trace signals.",
-                "root_cause": "The pipeline appears to transform model inputs or outputs before making those transformations observable.",
+                "mechanism": "Heuristic scan for LLM middleware and mutation filters versus raw/transformed trace signals.",
+                "root_cause": (
+                    "The pipeline may transform model inputs or outputs before making those transformations observable."
+                ),
                 "evidence_refs": _evidence(refs, "mutation", "pipeline", "audit"),
-                "confidence": 0.71,
+                "confidence": 0.58,
                 "fix_type": "architecture_change",
                 "recommended_fix": (
-                    "Log or trace raw and transformed messages with filter identity, order, and reason; keep sensitive "
-                    "raw logs protected while preserving enough evidence for debugging."
+                    "Ask the target agent to explain which filters mutate content, whether raw/transformed evidence is "
+                    "available elsewhere, and which sensitive raw logs should remain protected. Add traces only where "
+                    "the explanation leaves real debugging ambiguity."
                 ),
             }
         )
@@ -128,11 +131,11 @@ def scan_pipeline_middleware_integrity(target: Path) -> List[Dict[str, Any]]:
                 "mechanism": "Repository scan for multiple middleware/filter signals versus explicit ordering controls.",
                 "root_cause": "Middleware registration appears to rely on implicit order rather than a declared pipeline contract.",
                 "evidence_refs": _evidence(refs, "pipeline", "order"),
-                "confidence": 0.67,
+                "confidence": 0.55,
                 "fix_type": "architecture_change",
                 "recommended_fix": (
-                    "Declare pipeline ordering with stages or priorities, document inbound/outbound order, and test "
-                    "conflicting filters such as translate-before-redact versus redact-before-translate."
+                    "Ask the target agent to state the intended filter order. If order matters, declare it with stages "
+                    "or priorities and add one conflict test around the most important filter pair."
                 ),
             }
         )
@@ -151,11 +154,11 @@ def scan_pipeline_middleware_integrity(target: Path) -> List[Dict[str, Any]]:
                 "mechanism": "Repository scan for middleware chains versus filter error-handling policy.",
                 "root_cause": "The pipeline exposes automatic message transformation without defining what happens when filters fail.",
                 "evidence_refs": _evidence(refs, "pipeline", "failure"),
-                "confidence": 0.65,
+                "confidence": 0.54,
                 "fix_type": "architecture_change",
                 "recommended_fix": (
-                    "Define per-filter error behavior, timeouts, and fail-open/fail-closed defaults; surface filter "
-                    "failures in logs and user-visible status when they affect output."
+                    "Ask the target agent to document which filters fail open, which fail closed, and which only warn. "
+                    "Add timeout/error handling where a failure would materially change the answer."
                 ),
             }
         )

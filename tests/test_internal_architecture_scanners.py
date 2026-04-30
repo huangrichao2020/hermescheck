@@ -101,7 +101,7 @@ def test_role_play_orchestration_flags_serial_org_chart_agents(tmp_path: Path) -
 
     assert len(findings) == 1
     assert findings[0]["title"] == "Role-play handoff orchestration detected"
-    assert findings[0]["severity"] == "high"
+    assert findings[0]["severity"] == "medium"
 
 
 def test_role_play_orchestration_ignores_simple_parallel_subagent_notes(tmp_path: Path) -> None:

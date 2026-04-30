@@ -56,11 +56,14 @@ PERSONAL_HEALTH_BY_SEVERITY = {
 }
 PERSONAL_SEVERITY_OVERRIDES = {
     "code_execution": {"critical": "medium", "high": "low"},
-    "llm_routing": {"high": "medium"},
+    "knowledge_consistency": {"medium": "low"},
+    "llm_routing": {"high": "medium", "medium": "low"},
     "memory_management": {"medium": "low"},
     "observability": {"medium": "low"},
-    "tool_enforcement": {"high": "medium"},
+    "orchestration": {"high": "medium", "medium": "low"},
     "output_pipeline": {"medium": "low"},
+    "pipeline_middleware": {"high": "medium", "medium": "low"},
+    "tool_enforcement": {"high": "medium", "medium": "low"},
 }
 
 
@@ -128,20 +131,39 @@ def normalize_finding_for_profile(finding: dict, config: AuditConfig) -> dict:
             "For personal prototypes, this is usually a polish issue rather than an immediate blocker. "
             "Once the workflow stabilizes, add explicit retention, truncation, or TTL limits."
         )
+    elif source_layer == "knowledge_consistency":
+        normalized["recommended_fix"] = (
+            "Treat this as a target-agent self-review prompt, not an automatic failure. "
+            "Ask the target project to inventory docs, memory, skills, and runbooks; then update, merge, "
+            "or delete stale knowledge surfaces after checking the current tree."
+        )
+    elif source_layer == "orchestration":
+        normalized["recommended_fix"] = (
+            "Treat this as an architecture review question before changing code. Ask the target agent to identify "
+            "the single intent owner, explain which modules own planning/routing/retry, and collapse only confirmed "
+            "overlaps or handoff chains."
+        )
     elif source_layer == "tool_enforcement":
         normalized["recommended_fix"] = (
-            "For personal development, prompt-only guidance may be acceptable early on. "
-            "Before sharing or productionizing the project, add code-level validation for required tools."
+            "For personal development, prompt-only guidance may be acceptable early on. Ask the target agent to "
+            "state which tool expectations are advisory and which are hard requirements; add code-level validation "
+            "only for requirements that must survive sharing or production use."
         )
     elif source_layer == "llm_routing":
         normalized["recommended_fix"] = (
             "This may be acceptable in a personal prototype if the extra call is intentional and well understood. "
-            "If the project grows or is shared with others, document the secondary path and add stronger guardrails."
+            "Ask the target agent to document why the secondary path exists, what guardrails it inherits, and when "
+            "it should be folded into the main loop."
         )
     elif source_layer == "output_pipeline":
         normalized["recommended_fix"] = (
             "For personal development, small output shaping layers are often acceptable. "
             "If responses become user-facing or safety-sensitive, log the raw and transformed outputs explicitly."
+        )
+    elif source_layer == "pipeline_middleware":
+        normalized["recommended_fix"] = (
+            "Treat this as a pipeline design prompt. Ask the target agent to explain filter order, mutation points, "
+            "and failure behavior; add traces or tests only where the explanation reveals real ambiguity."
         )
 
     return normalized

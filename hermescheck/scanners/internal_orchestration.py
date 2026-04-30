@@ -48,7 +48,7 @@ def scan_internal_orchestration(target: Path) -> List[Dict[str, Any]]:
     if len(present_categories) < 3 or total_refs < 5:
         return findings
 
-    severity = "high" if len(present_categories) >= 4 or total_refs >= 10 else "medium"
+    severity = "medium" if len(present_categories) >= 4 or total_refs >= 10 else "low"
     category_summary = ", ".join(sorted(present_categories))
     evidence_refs: list[str] = []
     for refs in present_categories.values():
@@ -63,18 +63,21 @@ def scan_internal_orchestration(target: Path) -> List[Dict[str, Any]]:
                 f"({category_summary})."
             ),
             "user_impact": (
-                "Too many planning, routing, delegation, scheduling, and recovery layers can make the agent harder to "
-                "debug, slower to reason about, and more likely to hide internal contradictions."
+                "Multiple planning, routing, delegation, scheduling, and recovery layers can be legitimate, but they "
+                "deserve review because ownership may become hard to explain during an audit."
             ),
             "source_layer": "orchestration",
-            "mechanism": "Repository-wide scan for planner/router/subagent/scheduler/fallback style orchestration markers.",
-            "root_cause": "The agent runtime appears to coordinate work through many overlapping orchestration layers.",
+            "mechanism": "Heuristic scan for planner/router/subagent/scheduler/fallback style orchestration markers.",
+            "root_cause": (
+                "The repository may have overlapping coordination layers, or it may simply use clear names for "
+                "separate responsibilities."
+            ),
             "evidence_refs": evidence_refs,
-            "confidence": 0.72,
+            "confidence": 0.58,
             "fix_type": "architecture_change",
             "recommended_fix": (
-                "Collapse overlapping coordination layers where possible. Keep one clear main loop, minimize hidden "
-                "fallback paths, and document which module owns planning, routing, and retries."
+                "Ask the target agent to explain which layer owns planning, routing, delegation, scheduling, and "
+                "retries. Collapse only confirmed overlaps; otherwise document the ownership map and accepted tradeoff."
             ),
         }
     )

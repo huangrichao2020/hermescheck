@@ -88,7 +88,7 @@ def scan_role_play_orchestration(target: Path) -> List[Dict[str, Any]]:
     if role_count < 3 or handoff_count < 2:
         return findings
 
-    severity = "high" if role_count >= 4 and handoff_count >= 3 else "medium"
+    severity = "medium" if role_count >= 4 and handoff_count >= 3 else "low"
     role_summary = ", ".join(sorted(present_roles))
     evidence_refs: list[str] = []
     for refs in present_roles.values():
@@ -106,22 +106,22 @@ def scan_role_play_orchestration(target: Path) -> List[Dict[str, Any]]:
                 f"and {handoff_count} serial handoff markers."
             ),
             "user_impact": (
-                "Agent systems that mirror company departments often look organized while losing context at each "
-                "handoff. The result is local progress with global confusion: plans, reviews, and execution drift apart."
+                "Role-labeled agents can be useful, but serial handoffs should be reviewed because they can hide "
+                "where global intent is preserved and where context is compressed."
             ),
             "source_layer": "orchestration",
-            "mechanism": "Repository-wide scan for role-labeled agents combined with handoff/pipeline language.",
+            "mechanism": "Heuristic scan for role-labeled agents combined with handoff/pipeline language.",
             "root_cause": (
-                "The design appears to model agent collaboration as a serial org chart instead of one intent owner "
-                "forking independent exploration and merging evidence."
+                "The design may model collaboration as a serial org chart; the scan cannot prove whether those roles "
+                "are real runtime owners, prompt names, or documentation shorthand."
             ),
             "evidence_refs": evidence_refs[:10],
-            "confidence": 0.68,
+            "confidence": 0.57,
             "fix_type": "architecture_change",
             "recommended_fix": (
-                "Keep one agent or loop responsible for the full user intent. Use subagents for independent evidence "
-                "gathering or context isolation, then merge results back to the intent owner. Convert stable, bounded "
-                "steps into tools instead of giving every tool a role identity."
+                "Ask the target agent to show where the full user intent is preserved across handoffs. If roles are "
+                "only labels, document that. If they are runtime owners, keep one intent owner and use subagents for "
+                "independent evidence gathering with an explicit merge point."
             ),
         }
     )

@@ -10,7 +10,6 @@ then writes a complete hermescheck Skill package to output/hermescheck/.
 
 import json
 import re
-import sys
 from pathlib import Path
 
 HERMESCHECK_ROOT = Path(__file__).parent.parent
@@ -62,7 +61,7 @@ def generate_code_patterns_md():
         severity = sev_match.group(1) if sev_match else "medium"
 
         section += f"**Default severity**: `{severity}`\n\n"
-        section += f"**Regex patterns**:\n\n"
+        section += "**Regex patterns**:\n\n"
 
         for pat in name_pat:
             section += f"- `{pat}`\n"
@@ -92,7 +91,6 @@ Or run individual grep scans manually:
 
 def generate_skill_md():
     """Generate SKILL.md from hermescheck's README + schema + scanners."""
-    readme = (HERMESCHECK_ROOT / "README.md").read_text()
     schema = json.loads((HERMESCHECK_ROOT / "hermescheck" / "schema.json").read_text())
 
     skill = f"""---

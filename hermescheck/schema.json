@@ -252,6 +252,7 @@
               "stateful_recovery",
               "llm_cli_workers",
               "knowledge_retrieval",
+              "knowledge_consistency",
               "plugin_execution",
               "remote_tools",
               "pipeline_middleware",
