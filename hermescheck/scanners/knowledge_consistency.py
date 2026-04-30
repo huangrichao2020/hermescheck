@@ -45,7 +45,9 @@ RELATIVE_TIME_RE = re.compile(
     r"(?:今天|昨天|明天|最近|近期|刚刚|上周|下周|这周|本周|上个月|下个月)",
     re.IGNORECASE,
 )
-AGENT_CODE_RE = re.compile(r"(?:agent|subagent|tool_call|function_call|memory|skill|scheduler|orchestrator)", re.IGNORECASE)
+AGENT_CODE_RE = re.compile(
+    r"(?:agent|subagent|tool_call|function_call|memory|skill|scheduler|orchestrator)", re.IGNORECASE
+)
 
 
 def _should_skip(path: Path) -> bool:
@@ -173,9 +175,15 @@ def _inventory_gap_refs(target: Path, files: list[Path], doc_files: list[Path]) 
     if not target.is_dir():
         return []
 
-    has_root_instruction = any((target / name).exists() for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "HERMES.md"))
-    has_readme_or_docs = any(fp.name.startswith("README") or "docs" in {part.lower() for part in fp.parts} for fp in doc_files)
-    has_memory_or_skills = any(part.lower() in {"memory", "memories", "skills", "optional-skills"} for fp in files for part in fp.parts)
+    has_root_instruction = any(
+        (target / name).exists() for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "HERMES.md")
+    )
+    has_readme_or_docs = any(
+        fp.name.startswith("README") or "docs" in {part.lower() for part in fp.parts} for fp in doc_files
+    )
+    has_memory_or_skills = any(
+        part.lower() in {"memory", "memories", "skills", "optional-skills"} for fp in files for part in fp.parts
+    )
     has_agent_code = _has_agent_code(files)
 
     if (has_memory_or_skills and not has_root_instruction) or (has_agent_code and not has_readme_or_docs):
