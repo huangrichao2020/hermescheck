@@ -236,6 +236,19 @@ def test_recorded_cassettes_are_not_reported_as_real_secrets(tmp_path: Path) -> 
     assert findings == []
 
 
+def test_real_looking_secret_in_test_fixture_is_out_of_audit_scope(tmp_path: Path) -> None:
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    (tests_dir / "test_credentials.py").write_text(
+        'OPENAI_API_KEY = "sk-liveproductiontokenabcdef123456"\n',
+        encoding="utf-8",
+    )
+
+    findings = scan_secrets(tmp_path)
+
+    assert findings == []
+
+
 def test_real_looking_secret_is_still_reported(tmp_path: Path) -> None:
     (tmp_path / "settings.py").write_text(
         'OPENAI_API_KEY = "sk-liveproductiontokenabcdef123456"\n',

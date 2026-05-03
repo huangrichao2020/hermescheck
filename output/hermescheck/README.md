@@ -177,10 +177,15 @@ checkout. If it does, it verifies the presence of core runtime surfaces:
 | Gateway | `gateway/run.py`, `gateway/platforms/` |
 | Scheduling | `cron/scheduler.py` |
 | Execution environments | `tools/environments/` |
-| Plugins and tests | `plugins/`, `tests/` |
+| Plugins | `plugins/` |
 
 If a fork or packaging step drops one of these surfaces, the report makes the
 drift visible before the missing piece becomes a runtime surprise.
+
+`hermescheck` intentionally treats test suites, fixtures, specs, and coverage
+artifacts as out of scope for target audits. Maintainers can use tests as their
+own proof when closing an issue, but the scanner should focus findings on
+production/runtime architecture and source paths.
 
 ### Slash Command Contract
 
@@ -269,7 +274,7 @@ Then use the report to answer:
 
 - Did the change touch the agent loop, command registry, gateway, skills, cron, or SessionDB?
 - Did any interface work in CLI but not gateway, or vice versa?
-- Did a new tool path get a capability boundary, test, and observable failure mode?
+- Did a new tool path get a capability boundary and observable failure mode?
 - Did a memory or skill change preserve recall, search, and closure behavior?
 - Can an interrupted run verify environment state before repeating tool work?
 - Can the PR description cite a concrete validation command?

@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List
 
+from hermescheck.scanners.path_filters import iter_source_files, should_skip_path
+
 # Precompiled patterns
 SECRET_PATTERNS = [
     re.compile(r"sk-[a-zA-Z0-9]{20,}", re.IGNORECASE),  # OpenAI
@@ -48,7 +50,7 @@ SCAN_EXTENSIONS = {".py", ".ts", ".js", ".json", ".yaml", ".yml", ".env", ".toml
 
 
 def _should_skip(path: Path) -> bool:
-    return any(part in SKIP_DIRS for part in path.parts)
+    return should_skip_path(path, SKIP_DIRS)
 
 
 def _is_scan_target(path: Path) -> bool:
@@ -82,10 +84,7 @@ def _looks_like_public_or_fake_secret(path: Path, line: str, context: str, match
 def scan_secrets(target: Path) -> List[Dict[str, Any]]:
     findings: List[Dict[str, Any]] = []
 
-    if target.is_file():
-        files = [target]
-    else:
-        files = sorted(target.rglob("*"))
+    files = sorted(iter_source_files(target, extensions=SCAN_EXTENSIONS))
 
     for fp in files:
         if not fp.is_file() or _should_skip(fp) or not _is_scan_target(fp):

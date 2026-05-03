@@ -18,6 +18,16 @@ DEFAULT_SKIP_DIRS: Set[str] = {
     "build",
     "__pycache__",
     "coverage",
+    "test",
+    "tests",
+    "__tests__",
+    "test-support",
+    "test_support",
+    "spec",
+    "specs",
+    "fixture",
+    "fixtures",
+    "__fixtures__",
     "temp",
     ".mypy_cache",
     ".pytest_cache",
@@ -30,6 +40,11 @@ DEFAULT_SKIP_DIRS: Set[str] = {
 
 # Pre-computed lowercase skip dirs for fast O(1) lookup during os.walk.
 _DEFAULT_SKIP_DIRS_LOWER: Set[str] = {s.lower() for s in DEFAULT_SKIP_DIRS}
+
+TEST_FILE_RE = re.compile(
+    r"(?:^test[._-]|[._-]test$|[._-](?:test|spec)(?:[._-]|$)|(?:^|[._-])(?:fixture|fixtures)(?:[._-]|$))",
+    re.IGNORECASE,
+)
 
 # Default file extensions to include (source files only).
 DEFAULT_EXTENSIONS: Set[str] = {
@@ -74,15 +89,14 @@ def iter_source_files(
     Yields:
         Path objects for each matching file.
     """
+    skip_set = skip_dirs or set()
     if target.is_file():
-        yield target
+        if not should_skip_path(target, skip_set):
+            yield target
         return
 
     # Pre-compute lowercase skip set once, not per-directory.
-    if skip_dirs is not None:
-        skip_lower = _DEFAULT_SKIP_DIRS_LOWER | {s.lower() for s in skip_dirs}
-    else:
-        skip_lower = _DEFAULT_SKIP_DIRS_LOWER
+    skip_lower = _DEFAULT_SKIP_DIRS_LOWER | {s.lower() for s in skip_set}
 
     exts = extensions or DEFAULT_EXTENSIONS
 
@@ -96,6 +110,8 @@ def iter_source_files(
                 continue
 
             fp = Path(dirpath) / fname
+            if is_test_like_path(fp):
+                continue
             if looks_generated_asset(fp):
                 continue
 
@@ -132,7 +148,27 @@ def should_skip_path(path: Path, skip_dirs: set[str]) -> bool:
     all_skip_dirs = _DEFAULT_SKIP_DIRS_LOWER | {skip_dir.lower() for skip_dir in skip_dirs}
     if any(skip_dir in lowered_parts for skip_dir in all_skip_dirs):
         return True
+    if is_test_like_path(path):
+        return True
     return looks_generated_asset(path)
+
+
+def is_test_like_path(path: Path) -> bool:
+    """Return True for tests, specs, fixtures, and other non-runtime audit inputs."""
+
+    lowered_parts = {part.lower() for part in path.parts}
+    if lowered_parts & {
+        "test",
+        "tests",
+        "__tests__",
+        "test-support",
+        "test_support",
+        "fixture",
+        "fixtures",
+        "__fixtures__",
+    }:
+        return True
+    return bool(TEST_FILE_RE.search(path.stem.lower()))
 
 
 def looks_generated_asset(path: Path) -> bool:

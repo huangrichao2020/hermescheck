@@ -349,7 +349,7 @@ MILESTONES = {
     "capability_table": "把工具边界整理成 syscall/capability table，而不是散落在代码里。",
     "permission_policy": "把高权限工具纳入 blocklist、allowlist、needs-approval 和 read/write scope 的分层权限模型。",
     "memory_lifecycle": "给长期记忆增加类型、检索预算、冲突合并、active/durable 生命周期、衰减和证据指针。",
-    "memory_retrieval_i18n": "给 FTS/SQLite 记忆检索增加 CJK-safe tokenizer、fallback、reindex 和多语言回归测试。",
+    "memory_retrieval_i18n": "给 FTS/SQLite 记忆检索增加 CJK-safe tokenizer、fallback 和 reindex 路径。",
     "rag_governance": "给 RAG 增加 chunk、retrieval budget、rerank、ingestion 状态和 full-context 预算约束。",
     "token_efficiency": "学习 GenericAgent 的省 token 路线：<30K 热上下文、分层记忆、skill 复用、top-k/page-table 召回和成本指标。",
     "self_evolution_loop": (
@@ -390,7 +390,6 @@ FINDING_PENALTIES = {
     "Memory system lacks lifecycle governance": 10,
     "Memory retention lacks active-rule GC policy": 9,
     "Memory FTS lacks CJK-safe retrieval path": 9,
-    "Memory retrieval lacks multilingual regression tests": 5,
     "RAG pipeline lacks retrieval governance": 9,
     "RAG full-context mode lacks context budget": 6,
     "Agent lacks self-evolution capability": 12,

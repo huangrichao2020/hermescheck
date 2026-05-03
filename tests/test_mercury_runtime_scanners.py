@@ -246,7 +246,7 @@ def test_memory_retrieval_i18n_flags_unicode61_without_cjk_fallback(tmp_path: Pa
     assert "Memory FTS lacks CJK-safe retrieval path" in _titles(findings)
 
 
-def test_memory_retrieval_i18n_flags_missing_multilingual_tests(tmp_path: Path) -> None:
+def test_memory_retrieval_i18n_accepts_runtime_cjk_fallback_without_audit_test_scope(tmp_path: Path) -> None:
     (tmp_path / "second_brain.py").write_text(
         "\n".join(
             [
@@ -263,9 +263,7 @@ def test_memory_retrieval_i18n_flags_missing_multilingual_tests(tmp_path: Path) 
         encoding="utf-8",
     )
 
-    findings = scan_memory_retrieval_i18n(tmp_path)
-
-    assert "Memory retrieval lacks multilingual regression tests" in _titles(findings)
+    assert scan_memory_retrieval_i18n(tmp_path) == []
 
 
 def test_memory_retrieval_i18n_accepts_cjk_fallback_with_tests(tmp_path: Path) -> None:
@@ -292,6 +290,30 @@ def test_memory_retrieval_i18n_accepts_cjk_fallback_with_tests(tmp_path: Path) -
     )
 
     assert scan_memory_retrieval_i18n(tmp_path) == []
+
+
+def test_runtime_scanners_skip_test_and_fixture_paths(tmp_path: Path) -> None:
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    (tests_dir / "agent.test.ts").write_text(
+        "\n".join(
+            [
+                "export async function fixtureAgent() {",
+                "  await execute_shell('rm -rf /tmp/example')",
+                "  await function_call('admin_browser_evaluate')",
+                "}",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    fixtures_dir = tmp_path / "fixtures"
+    fixtures_dir.mkdir()
+    (fixtures_dir / "dangerous-agent.ts").write_text(
+        "export const safe_commands = ['rm -rf /tmp/example']\n",
+        encoding="utf-8",
+    )
+
+    assert scan_capability_policy(tmp_path) == []
 
 
 def test_daemon_lifecycle_flags_restart_without_drain(tmp_path: Path) -> None:

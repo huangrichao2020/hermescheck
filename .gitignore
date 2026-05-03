@@ -7,5 +7,6 @@ __pycache__/
 dist/
 build/
 .venv/
+.omx/
 audit_results.json
 audit_report.md
