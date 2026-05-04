@@ -1,11 +1,16 @@
 # Changelog
 
+## 1.3.1
+
+- Exclude tests, fixtures, specs, and coverage artifacts from target audit findings.
+- Remove the CJK memory retrieval "missing multilingual regression tests" finding.
+- Route secret scanning through shared path filters so fixture keys stay out of reports.
+
 ## 1.3.0
 
 - Add knowledge consistency checks for stale doc paths, relative time language, and missing root knowledge surfaces.
 - Recalibrate regex-heavy architecture findings toward advisory target-agent self-review prompts.
 - Reduce personal-profile severity for orchestration, hidden LLM, tool enforcement, and pipeline middleware findings.
-- Exclude tests, fixtures, specs, and coverage artifacts from target audit findings.
 
 ## 1.2.6
 

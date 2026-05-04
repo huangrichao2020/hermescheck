@@ -1,16 +1,14 @@
 # hermescheck 1.3.0 Release Notes
 
-`hermescheck` 1.3.0 adds advisory knowledge consistency checks, softens
-regex-heavy architecture findings, and narrows target audits to
-production/runtime architecture instead of test-suite quality.
+`hermescheck` 1.3.0 adds advisory knowledge consistency checks and softens
+regex-heavy architecture findings so audits can guide target-agent self-review
+instead of over-punishing project vocabulary.
 
 ## Headline
 
 This release treats the target agent's knowledge layer as part of the
 architecture: docs, root instructions, memory, skills, and runbooks must point
-to the current source of truth. It also makes the audit boundary sharper:
-tests, fixtures, specs, and coverage artifacts are maintainer proof surfaces,
-not target findings.
+to the current source of truth.
 
 ## What Changed
 
@@ -23,13 +21,6 @@ not target findings.
   self-review prompts.
 - Reduced maturity-score penalties for regex-level orchestration and pipeline
   middleware findings.
-- Excluded tests, fixtures, specs, and coverage artifacts from behavior-focused
-  scanner inputs so reports stay centered on production/runtime paths.
-- Removed the "missing multilingual regression tests" finding from the CJK
-  memory retrieval scanner; it now checks the runtime retrieval path instead of
-  test coverage.
-- Routed the secret scanner through the shared path filters so fixture keys do
-  not leak back into target audit findings.
 - Updated the VS Code extension metadata and changelog to `1.3.0`.
 - Cleaned the skill-generation helper so release lint stays green.
 
@@ -42,9 +33,7 @@ runtime behavior.
 
 `hermescheck` now asks the target agent to explain and verify those surfaces
 before recommending code changes. The result should be less noise, clearer
-self-review, and more useful audits for Hermes-style persistent agents. Test
-evidence remains valuable, but it should support a maintainer decision rather
-than become a standalone audit complaint.
+self-review, and more useful audits for Hermes-style persistent agents.
 
 ## Release Targets
 
