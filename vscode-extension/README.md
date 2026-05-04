@@ -91,13 +91,11 @@ absolute executable path.
 
 Open a folder in VS Code before running `HermesCheck: Audit Workspace`.
 
-### The report shows many findings in tests or fixture files
+### Test or fixture files appear in report evidence
 
-Run the CLI directly for advanced options and targeted paths:
-
-```bash
-hermescheck /path/to/hermes-agent --profile personal -o audit_results.json -r audit_report.md
-```
+Upgrade the CLI to `hermescheck` 1.3.1 or newer. Target audits intentionally
+ignore tests, fixtures, specs, and coverage artifacts so findings stay focused
+on production/runtime architecture.
 
 ## Links
 
