@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List
 
-from hermescheck.scanners.path_filters import should_skip_path
+from hermescheck.scanners.path_filters import iter_source_files, should_skip_path
 
 SCAN_EXTENSIONS = {".py", ".ts", ".js", ".tsx", ".jsx", ".md", ".yaml", ".yml", ".toml"}
 SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "build", "coverage"}
@@ -56,7 +56,7 @@ def scan_role_play_orchestration(target: Path) -> List[Dict[str, Any]]:
     agent_role_refs: list[str] = []
     tool_as_agent_refs: list[str] = []
 
-    files = [target] if target.is_file() else sorted(target.rglob("*"))
+    files = list(iter_source_files(target, skip_dirs=SKIP_DIRS))
     for fp in files:
         if not fp.is_file() or _should_skip(fp) or fp.suffix not in SCAN_EXTENSIONS:
             continue

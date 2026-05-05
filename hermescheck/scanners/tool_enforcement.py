@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List
 
-from hermescheck.scanners.path_filters import should_skip_path
+from hermescheck.scanners.path_filters import iter_source_files, should_skip_path
 
 # Precompiled patterns
 PROMPT_TOOL_RE = re.compile(
@@ -35,7 +35,7 @@ def _should_skip(path: Path) -> bool:
 def _scan_prompts(target: Path) -> List[Path]:
     """Return files that contain tool-use requirements in prompts."""
     result = []
-    files = [target] if target.is_file() else sorted(target.rglob("*"))
+    files = list(iter_source_files(target, skip_dirs=SKIP_DIRS))
     for fp in files:
         if not fp.is_file() or _should_skip(fp) or fp.suffix not in SCAN_PROMPT_EXT:
             continue
@@ -52,7 +52,7 @@ def _scan_code_enforcement(target: Path) -> tuple[bool, List[Path]]:
     """Return (has_validation, files_with_tool_calls)."""
     tool_call_files: List[Path] = []
     has_validation = False
-    files = [target] if target.is_file() else sorted(target.rglob("*"))
+    files = list(iter_source_files(target, skip_dirs=SKIP_DIRS))
     for fp in files:
         if not fp.is_file() or _should_skip(fp) or fp.suffix not in SCAN_CODE_EXT:
             continue

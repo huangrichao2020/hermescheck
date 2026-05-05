@@ -16,7 +16,7 @@ from hermescheck.config import (
 )
 from hermescheck.maturity import score_maturity
 from hermescheck.scanners import ScannerSpec, get_enabled_scanners
-from hermescheck.scanners.path_filters import DEFAULT_SKIP_DIRS, should_skip_path
+from hermescheck.scanners.path_filters import DEFAULT_SKIP_DIRS, iter_source_files, should_skip_path
 from hermescheck.self_review import normalize_self_review
 
 SEVERITY_BUCKETS = ("critical", "high", "medium", "low")
@@ -49,13 +49,12 @@ def _infer_entrypoints(target: Path) -> list[str]:
         return [str(target)]
 
     candidates = []
-    for name in ENTRYPOINT_NAMES:
-        for match in sorted(target.rglob(name)):
-            if _skip_scope_path(match):
-                continue
-            candidates.append(str(match))
-            if len(candidates) == 5:
-                return candidates
+    for match in sorted(iter_source_files(target, skip_dirs=SCOPE_SKIP_DIRS)):
+        if match.name not in ENTRYPOINT_NAMES or _skip_scope_path(match):
+            continue
+        candidates.append(str(match))
+        if len(candidates) == 5:
+            return candidates
     return candidates or [str(target)]
 
 
@@ -65,7 +64,7 @@ def _infer_channels(target: Path) -> list[str]:
     else:
         files = sorted(
             fp
-            for fp in target.rglob("*")
+            for fp in iter_source_files(target, skip_dirs=SCOPE_SKIP_DIRS)
             if fp.is_file() and not _skip_scope_path(fp) and fp.suffix in {".py", ".js", ".ts", ".tsx", ".md"}
         )[:50]
         contents = [_read_text(fp) for fp in files]
@@ -83,7 +82,7 @@ def _infer_model_stack(target: Path) -> list[str]:
     else:
         files = sorted(
             fp
-            for fp in target.rglob("*")
+            for fp in iter_source_files(target, skip_dirs=SCOPE_SKIP_DIRS)
             if fp.is_file() and not _skip_scope_path(fp) and fp.suffix in {".py", ".js", ".ts", ".tsx", ".md", ".toml"}
         )[:80]
         contents = [_read_text(fp) for fp in files]

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from hermescheck.config import AuditConfig
-from hermescheck.scanners.path_filters import should_skip_path
+from hermescheck.scanners.path_filters import iter_source_files, should_skip_path
 
 PRIVILEGED_CAPABILITY_RE = re.compile(
     r"(?:subprocess\.run|subprocess\.Popen|os\.system|shell\s*=\s*True|"
@@ -53,7 +53,7 @@ def scan_excessive_agency(target: Path, config: AuditConfig) -> List[Dict[str, A
     capability_refs: List[str] = []
     control_refs: dict[str, List[str]] = {key: [] for key in CONTROL_PATTERNS}
 
-    files = [target] if target.is_file() else sorted(target.rglob("*"))
+    files = list(iter_source_files(target, skip_dirs=SKIP_DIRS))
     for fp in files:
         if not fp.is_file() or _should_skip(fp) or fp.suffix not in SCAN_EXTENSIONS:
             continue

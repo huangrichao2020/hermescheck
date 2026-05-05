@@ -50,6 +50,27 @@ def test_run_audit_scope_ignores_dependency_entrypoints(tmp_path: Path) -> None:
     assert results["scope"]["entrypoints"] == [str(tmp_path / "app.py")]
 
 
+def test_run_audit_omits_large_dependency_dirs_from_evidence(tmp_path: Path) -> None:
+    node_module = tmp_path / "node_modules" / "bad-package"
+    node_module.mkdir(parents=True)
+    (node_module / "index.js").write_text("eval(userInput)\n", encoding="utf-8")
+    site_package = tmp_path / ".venv" / "lib" / "python3.12" / "site-packages" / "bad_package"
+    site_package.mkdir(parents=True)
+    (site_package / "settings.py").write_text(
+        'OPENAI_API_KEY = "sk-liveproductiontokenabcdef123456"\n', encoding="utf-8"
+    )
+    (tmp_path / "agent.py").write_text("print('project runtime')\n", encoding="utf-8")
+
+    results = run_audit(
+        str(tmp_path),
+        config=AuditConfig.from_profile("personal"),
+        verbose=False,
+    )
+
+    evidence_refs = [ref for finding in results["findings"] for ref in finding.get("evidence_refs", [])]
+    assert not any("node_modules" in ref or ".venv" in ref for ref in evidence_refs)
+
+
 def test_run_audit_can_include_target_agent_self_review(tmp_path: Path) -> None:
     (tmp_path / "agent.py").write_text("print('agent')\n", encoding="utf-8")
 

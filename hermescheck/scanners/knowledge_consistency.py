@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 from urllib.parse import unquote
 
-from hermescheck.scanners.path_filters import should_skip_path
+from hermescheck.scanners.path_filters import iter_source_files, should_skip_path
 
 DOC_EXTENSIONS = {".md", ".txt", ".rst"}
 CODE_EXTENSIONS = {".py", ".ts", ".js", ".tsx", ".jsx"}
@@ -71,7 +71,7 @@ def _is_doc_surface(path: Path, target: Path) -> bool:
 
 
 def _iter_files(target: Path) -> list[Path]:
-    files = [target] if target.is_file() else sorted(target.rglob("*"))
+    files = list(iter_source_files(target, skip_dirs=SKIP_DIRS))
     return [fp for fp in files if fp.is_file() and not _should_skip(fp)]
 
 

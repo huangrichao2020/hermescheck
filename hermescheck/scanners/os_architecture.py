@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List
 
-from hermescheck.scanners.path_filters import should_skip_path
+from hermescheck.scanners.path_filters import iter_source_files, should_skip_path
 
 SCAN_EXTENSIONS = {
     ".py",
@@ -162,7 +162,7 @@ def _should_skip(path: Path) -> bool:
 
 def _collect_signals(target: Path) -> SignalSet:
     refs: dict[str, list[str]] = {key: [] for key in PATTERNS}
-    files = [target] if target.is_file() else sorted(target.rglob("*"))
+    files = list(iter_source_files(target, skip_dirs=SKIP_DIRS))
     for fp in files:
         if not fp.is_file() or _should_skip(fp) or fp.suffix not in SCAN_EXTENSIONS:
             continue

@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List
 
+from hermescheck.scanners.path_filters import iter_source_files, should_skip_path
+
 MEMORY_FILE_RE = re.compile(
     r"(?:memory|checkpoint|archive|summary|history|session|state|snapshot|insight)",
     re.IGNORECASE,
@@ -18,7 +20,7 @@ SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "bu
 
 
 def _should_skip(path: Path) -> bool:
-    return any(part in SKIP_DIRS for part in path.parts)
+    return should_skip_path(path, SKIP_DIRS)
 
 
 def _normalize_memory_stem(path: Path) -> str:
@@ -33,7 +35,7 @@ def scan_memory_freshness(target: Path) -> List[Dict[str, Any]]:
     memory_files: list[Path] = []
     categories_present: set[str] = set()
 
-    files = [target] if target.is_file() else sorted(target.rglob("*"))
+    files = list(iter_source_files(target, skip_dirs=SKIP_DIRS))
     for fp in files:
         if not fp.is_file() or _should_skip(fp) or fp.suffix not in SCAN_EXTENSIONS:
             continue
