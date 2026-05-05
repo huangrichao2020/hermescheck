@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.2
+
+- Prune large skipped directories such as `node_modules/` and `.venv/` before recursive audit traversal.
+
 ## 1.3.1
 
 - Exclude tests, fixtures, specs, and coverage artifacts from target audit findings.

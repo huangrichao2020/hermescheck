@@ -93,7 +93,7 @@ Open a folder in VS Code before running `HermesCheck: Audit Workspace`.
 
 ### Test or fixture files appear in report evidence
 
-Upgrade the CLI to `hermescheck` 1.3.1 or newer. Target audits intentionally
+Upgrade the CLI to `hermescheck` 1.3.2 or newer. Target audits intentionally
 ignore tests, fixtures, specs, and coverage artifacts so findings stay focused
 on production/runtime architecture.
 
