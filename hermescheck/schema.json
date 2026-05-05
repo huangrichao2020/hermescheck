@@ -257,7 +257,8 @@
               "remote_tools",
               "pipeline_middleware",
               "runtime_bug_inference",
-              "self_evolution"
+              "self_evolution",
+              "cognitive_runtime"
             ]
           },
           "minItems": 1

@@ -11,6 +11,7 @@ from hermescheck.scanners.bug_inference import scan_bug_inference
 from hermescheck.scanners.capability_policy import scan_capability_policy
 from hermescheck.scanners.code_execution import scan_code_execution
 from hermescheck.scanners.completion_closure import scan_completion_closure
+from hermescheck.scanners.cognitive_runtime_governance import scan_cognitive_runtime_governance
 from hermescheck.scanners.daemon_lifecycle import scan_daemon_lifecycle
 from hermescheck.scanners.excessive_agency import scan_excessive_agency
 from hermescheck.scanners.hermes_contract import scan_hermes_contract
@@ -120,6 +121,12 @@ SCANNER_REGISTRY = [
         name="Self-Evolution Capability",
         func=_adapt(scan_self_evolution_capability),
         audited_layers=("self_evolution", "active_recall", "persistence"),
+    ),
+    ScannerSpec(
+        slug="cognitive_runtime_governance",
+        name="Cognitive Runtime Governance",
+        func=_adapt(scan_cognitive_runtime_governance),
+        audited_layers=("cognitive_runtime", "active_recall", "long_term_memory"),
     ),
     ScannerSpec(
         slug="impression_memory",
@@ -256,6 +263,7 @@ def get_enabled_scanners(config: AuditConfig) -> list[ScannerSpec]:
             "memory_retrieval_i18n",
             "rag_pipeline_governance",
             "self_evolution_capability",
+            "cognitive_runtime_governance",
             "impression_memory",
             "knowledge_consistency",
             "role_play_orchestration",
@@ -291,6 +299,7 @@ __all__ = [
     "scan_capability_policy",
     "scan_code_execution",
     "scan_completion_closure",
+    "scan_cognitive_runtime_governance",
     "scan_daemon_lifecycle",
     "scan_excessive_agency",
     "scan_hermes_contract",

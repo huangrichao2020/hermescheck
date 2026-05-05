@@ -41,6 +41,17 @@ ACTIVE_WORK_RE = re.compile(
     r"job[_ -]?queue|task[_ -]?queue|inflight|in[-_ ]?flight|pending[_ -]?jobs|session[_ -]?state)\b",
     re.IGNORECASE,
 )
+TIMEOUT_RE = re.compile(
+    r"\b(?:timeout|timed[_ -]?out|inactivity|idle[_ -]?(?:agent|session|timeout)|"
+    r"gateway[_ -]?timeout|agent[_ -]?timeout|seconds[_ -]?since[_ -]?activity|last[_ -]?activity)\b",
+    re.IGNORECASE,
+)
+EVICTION_RE = re.compile(
+    r"\b(?:evict|eviction|drop[_ -]?(?:cached|stale)|remove[_ -]?(?:cached|stale)|"
+    r"purge[_ -]?(?:cached|stale)|delete[_ -]?(?:cached|stale)|clear[_ -]?(?:cached|stale)|"
+    r"cached[_ -]?agent|agent[_ -]?cache|session[_ -]?cache)\b",
+    re.IGNORECASE,
+)
 DRAIN_RE = re.compile(
     r"\b(?:drain|graceful[_ -]?(?:shutdown|restart|stop)|quiesce|wait[_ -]?for[_ -]?(?:idle|jobs)|"
     r"stop[_ -]?accepting|pre[_ -]?restart|restart[_ -]?barrier|safe[_ -]?restart)\b",
@@ -118,6 +129,8 @@ def _collect_refs(target: Path) -> dict[str, list[str]]:
             "daemon",
             "restart",
             "active",
+            "timeout",
+            "eviction",
             "drain",
             "recovery",
             "agent_session_memory",
@@ -142,6 +155,10 @@ def _collect_refs(target: Path) -> dict[str, list[str]]:
                 refs["restart"].append(ref)
             if ACTIVE_WORK_RE.search(line):
                 refs["active"].append(ref)
+            if TIMEOUT_RE.search(line):
+                refs["timeout"].append(ref)
+            if EVICTION_RE.search(line):
+                refs["eviction"].append(ref)
             if DRAIN_RE.search(line):
                 refs["drain"].append(ref)
             if RECOVERY_RE.search(line):
@@ -173,7 +190,8 @@ def _evidence(refs: dict[str, list[str]], *keys: str, limit: int = 9) -> list[st
 
 def scan_daemon_lifecycle(target: Path) -> List[Dict[str, Any]]:
     refs = _collect_refs(target)
-    if not refs["self_restart"] and (len(refs["daemon"]) < 2 or not refs["restart"]):
+    has_timeout_lifecycle = bool(refs["active"] and refs["timeout"])
+    if not refs["self_restart"] and not has_timeout_lifecycle and (len(refs["daemon"]) < 2 or not refs["restart"]):
         return []
 
     findings: list[dict[str, Any]] = []
@@ -206,6 +224,39 @@ def scan_daemon_lifecycle(target: Path) -> List[Dict[str, Any]]:
                     "Route self-restart requests through an external supervisor or service-manager job such as a "
                     "transient systemd unit, exit-code handoff, or durable restart request. The agent turn should "
                     "return before the old process is stopped, and startup must verify the new PID and channels."
+                ),
+            }
+        )
+
+    if refs["active"] and refs["timeout"] and not refs["eviction"]:
+        findings.append(
+            {
+                "severity": "high",
+                "title": "Gateway timeout leaves stale cached agents",
+                "symptom": (
+                    "Detected active agent/session tracking and inactivity timeout behavior, but no visible eviction "
+                    "or stale-cache cleanup path for the timed-out agent."
+                ),
+                "user_impact": (
+                    "After a timeout, the gateway may keep a poisoned or interrupted agent instance in cache. The next "
+                    "message can resume stale tool state, repeat a stuck call, or force the user into manual reset."
+                ),
+                "source_layer": "daemon_lifecycle",
+                "mechanism": (
+                    "Repository scan for gateway active-agent/session timeout handling versus explicit cached-agent "
+                    "eviction or stale session cleanup."
+                ),
+                "root_cause": (
+                    "The timeout path appears to notify or interrupt the user-visible run without also invalidating "
+                    "the cached control-plane object that caused the timeout."
+                ),
+                "evidence_refs": _evidence(refs, "active", "timeout", "eviction", "daemon", limit=9),
+                "confidence": 0.72,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "When a gateway run times out, interrupt the agent, persist a failed result for the current turn, "
+                    "then evict the cached agent/session before processing the next message. Log the eviction with "
+                    "session id and activity summary so future timeouts are diagnosable."
                 ),
             }
         )
@@ -251,6 +302,7 @@ def scan_daemon_lifecycle(target: Path) -> List[Dict[str, Any]]:
 
     guard_categories = {
         "active_work_check": refs["active"],
+        "timeout_eviction": refs["timeout"] and refs["eviction"],
         "drain_protocol": refs["drain"],
         "recovery_checkpoint": refs["recovery"],
         "recent_session_recall": refs["recent_recall"],

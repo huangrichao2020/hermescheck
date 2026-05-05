@@ -5,6 +5,7 @@ from pathlib import Path
 from hermescheck.audit import run_audit
 from hermescheck.config import AuditConfig
 from hermescheck.scanners.capability_policy import scan_capability_policy
+from hermescheck.scanners.cognitive_runtime_governance import scan_cognitive_runtime_governance
 from hermescheck.scanners.daemon_lifecycle import scan_daemon_lifecycle
 from hermescheck.scanners.loop_safety import scan_loop_safety
 from hermescheck.scanners.memory_lifecycle import scan_memory_lifecycle
@@ -440,6 +441,176 @@ def test_daemon_lifecycle_flags_restart_without_recent_session_recall(tmp_path: 
     )
 
 
+def test_daemon_lifecycle_flags_timeout_without_cached_agent_eviction(tmp_path: Path) -> None:
+    (tmp_path / "gateway.py").write_text(
+        "\n".join(
+            [
+                "class GatewayRunner:",
+                "    def run_forever(self):",
+                "        gateway_heartbeat.tick()",
+                "",
+                "    def handle_agent_timeout(self, session_key):",
+                "        active_agents = self.active_agents",
+                "        if seconds_since_activity > agent_timeout:",
+                "            agent.interrupt('timeout')",
+                "            return {'failed': True}",
+                "",
+                "    def restart(self):",
+                "        wait_for_idle(active_agents)",
+                "        drain_job_queue()",
+                "        checkpoint_sessions_for_resume()",
+                "        inject_startup_recall_context(load_recent_sessions(limit=5))",
+                "        post_restart_health_check(status='connected')",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_daemon_lifecycle(tmp_path)
+    by_title = {finding["title"]: finding for finding in findings}
+
+    assert by_title["Gateway timeout leaves stale cached agents"]["severity"] == "high"
+
+
+def test_daemon_lifecycle_accepts_timeout_with_cached_agent_eviction(tmp_path: Path) -> None:
+    (tmp_path / "gateway.py").write_text(
+        "\n".join(
+            [
+                "class GatewayRunner:",
+                "    def run_forever(self):",
+                "        gateway_heartbeat.tick()",
+                "",
+                "    def handle_agent_timeout(self, session_key):",
+                "        active_agents = self.active_agents",
+                "        if seconds_since_activity > agent_timeout:",
+                "            agent.interrupt('timeout')",
+                "            self._evict_cached_agent(session_key)",
+                "            logger.info('evicted cached agent after inactivity timeout')",
+                "            return {'failed': True}",
+                "",
+                "    def restart(self):",
+                "        wait_for_idle(active_agents)",
+                "        drain_job_queue()",
+                "        checkpoint_sessions_for_resume()",
+                "        inject_startup_recall_context(load_recent_sessions(limit=5))",
+                "        post_restart_health_check(status='connected')",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    titles = _titles(scan_daemon_lifecycle(tmp_path))
+
+    assert "Gateway timeout leaves stale cached agents" not in titles
+
+
+def test_cognitive_runtime_flags_depth_router_without_visible_boundary(tmp_path: Path) -> None:
+    (tmp_path / "cognitive_layers.py").write_text(
+        "\n".join(
+            [
+                "def classify_cognitive_layer(user_message):",
+                "    if 'architecture' in user_message:",
+                "        return {'input_layer': 'L4', 'processing_mode': 'deep'}",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_cognitive_runtime_governance(tmp_path)
+
+    assert "Cognitive routing lacks visible-output boundary" in _titles(findings)
+
+
+def test_cognitive_runtime_flags_post_turn_reflection_without_governance(tmp_path: Path) -> None:
+    (tmp_path / "post_turn_reflection.py").write_text(
+        "\n".join(
+            [
+                "def record_post_turn_reflection(user_message, final_response):",
+                "    reflection = {'lesson': user_message + final_response}",
+                "    open('AGENT_LEARNINGS.jsonl', 'a').write(str(reflection))",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_cognitive_runtime_governance(tmp_path)
+
+    assert "Post-turn reflection lacks memory admission governance" in _titles(findings)
+
+
+def test_cognitive_runtime_flags_mechanism_stack_without_sidecar_safety(tmp_path: Path) -> None:
+    (tmp_path / "runtime_mechanisms.py").write_text(
+        "\n".join(
+            [
+                "class LoopDetector: pass",
+                "class ReviewMechanism: pass",
+                "class InternalizationMechanism: pass",
+                "class ResilienceMechanism: pass",
+                "class ContextSandbox: pass",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_cognitive_runtime_governance(tmp_path)
+
+    assert "Runtime mechanism stack lacks sidecar safety policy" in _titles(findings)
+
+
+def test_cognitive_runtime_accepts_bounded_reflection_and_sidecar_controls(tmp_path: Path) -> None:
+    (tmp_path / "cognitive_layers.py").write_text(
+        "\n".join(
+            [
+                "class CognitiveLayerDecision:",
+                "    input_layer = 'L4'",
+                "    processing_mode = 'map runtime boundaries'",
+                "    visible_output_layer = 'L2 execution report'",
+                "    runtime_rule = 'Do not dump deeper architecture unless user intent requires it.'",
+                "    boundary = 'Memory/context layers decide what to load; this hook is ephemeral for current turn.'",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "post_turn_reflection.py").write_text(
+        "\n".join(
+            [
+                "def append_reflection_episode(reflection):",
+                "    episode = {'schema_version': 1, 'source': 'post_turn_reflection', 'session_id': sid}",
+                "    episode['confidence'] = 0.65",
+                "    episode['importance'] = min(10, importance)",
+                "    episode['preview'] = compact(text, limit=240)",
+                "    # does not promote directly into semantic memory; dream cycle reviews admission later",
+                "    fcntl.flock(handle.fileno(), fcntl.LOCK_EX)",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "runtime_mechanisms.py").write_text(
+        "\n".join(
+            [
+                "class LoopDetector:",
+                "    MAX_TOOL_CALLS = 50",
+                "    EXACT_REPEAT_THRESHOLD = 4",
+                "    recent_calls = deque(maxlen=30)",
+                "class ReviewMechanism:",
+                "    max_history = 20",
+                "class InternalizationMechanism: pass",
+                "class ResilienceMechanism: pass",
+                "class ContextSandbox:",
+                "    max_output_size = 15000",
+                "def handle_tool_result():",
+                "    try:",
+                "        observe_only_runtime_mechanisms()",
+                "    except Exception:",
+                "        pass  # fail soft: sidecar failure does not block main tool path",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    assert scan_cognitive_runtime_governance(tmp_path) == []
+
+
 def test_new_runtime_scanners_are_enabled_in_personal_audits(tmp_path: Path) -> None:
     (tmp_path / "agent.py").write_text(
         "\n".join(
@@ -456,8 +627,13 @@ def test_new_runtime_scanners_are_enabled_in_personal_audits(tmp_path: Path) -> 
         ),
         encoding="utf-8",
     )
+    (tmp_path / "cognitive_layers.py").write_text(
+        "def classify_cognitive_layer(msg): return {'input_layer': 'L4', 'processing_mode': 'deep'}\n",
+        encoding="utf-8",
+    )
 
     results = run_audit(str(tmp_path), config=AuditConfig.from_profile("personal"), verbose=False)
     titles = [finding["title"] for finding in results["findings"]]
 
     assert "High-agency tools lack layered permission policy" in titles
+    assert "Cognitive routing lacks visible-output boundary" in titles
