@@ -6,14 +6,19 @@
 
 # hermescheck
 
-Hermes Agent-focused architecture and runtime health checks.
+Architecture audit cards for AI agent runtimes.
 
-`hermescheck` is a community companion tool for
-[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent). It
-scans a Hermes Agent checkout or fork and produces a structured report about
-runtime contracts, command-surface drift, memory and skill architecture,
-gateway readiness, scheduled jobs, tool boundaries, observability, and common
-agent-system failure modes.
+`hermescheck` scans an AI agent checkout and produces a structured architecture
+report about memory drift, tool-boundary gaps, runtime sprawl, gateway risks,
+scheduler behavior, observability, and other long-running agent failure modes.
+It can also render the result as a clean PNG report card for README images,
+release posts, and maintainer-friendly architecture snapshots.
+
+Hermes Agent remains the first deep adaptation target. `hermescheck` is a
+community companion tool for
+[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent), and
+its strongest checks are shaped around Hermes forks, deployments, and review
+workflows.
 
 This project is not an official Nous Research project. It is built for the
 Hermes Agent community and derived from the general-purpose
@@ -38,6 +43,10 @@ developer communities.
 
 <p align="center">
   <a href="./docs/releases/README.md">Release notes</a>
+</p>
+
+<p align="center">
+  <img src="./assets/readme/hermescheck-report-card.png" alt="HermesCheck report card showing architecture score, priority findings, runtime signals, and production audit scope" width="100%">
 </p>
 
 ## Why It Exists
@@ -87,6 +96,15 @@ The architecture should provide these capabilities:
 pip install hermescheck
 ```
 
+Try it on any agent repository:
+
+```bash
+hermescheck ./path/to/agent-repo \
+  --profile personal \
+  -o audit_results.json \
+  -r audit_report.md
+```
+
 Scan a Hermes Agent checkout:
 
 ```bash
@@ -108,6 +126,13 @@ Run as a module from a local clone:
 
 ```bash
 python -m hermescheck ./path/to/hermes-agent --quiet
+```
+
+Render a shareable report card:
+
+```bash
+pip install "hermescheck[card]"
+hermescheck card audit_results.json -o audit_card.png
 ```
 
 ## Example Report Snapshot
