@@ -9,6 +9,7 @@ from typing import Sequence
 
 from hermescheck import __version__
 from hermescheck.audit import run_audit, save_results
+from hermescheck.card import CardRenderError, render_report_card
 from hermescheck.config import AuditConfig, should_fail_for_threshold
 from hermescheck.contribute import (
     CONTRIBUTION_LAYERS,
@@ -20,7 +21,7 @@ from hermescheck.sarif import generate_sarif, save_sarif
 from hermescheck.schema import validate_report
 from hermescheck.self_review import load_self_review
 
-KNOWN_COMMANDS = {"audit", "report", "validate", "contribute"}
+KNOWN_COMMANDS = {"audit", "report", "validate", "card", "contribute"}
 
 
 def _normalize_argv(argv: Sequence[str]) -> list[str]:
@@ -67,6 +68,13 @@ def build_parser() -> argparse.ArgumentParser:
     report_parser.add_argument("input", help="Input JSON results file")
     report_parser.add_argument("-o", "--output", help="Output markdown file (prints to stdout if omitted)")
     report_parser.set_defaults(func=cmd_report)
+
+    card_parser = subparsers.add_parser("card", help="Render a PNG report card from JSON results")
+    card_parser.add_argument("input", help="Input JSON results file")
+    card_parser.add_argument("-o", "--output", default="audit_card.png", help="Output PNG file")
+    card_parser.add_argument("--title", help="Override the card title")
+    card_parser.add_argument("--subtitle", help="Override the card subtitle")
+    card_parser.set_defaults(func=cmd_card)
 
     validate_parser = subparsers.add_parser("validate", help="Validate audit results against schema")
     validate_parser.add_argument("input", help="JSON results file to validate")
@@ -177,6 +185,29 @@ def cmd_validate(args: argparse.Namespace) -> int:
         return 1
 
     print("✅ Schema validation passed")
+    return 0
+
+
+def cmd_card(args: argparse.Namespace) -> int:
+    """Render a PNG report card from JSON results."""
+
+    with open(args.input, encoding="utf-8") as handle:
+        results = json.load(handle)
+
+    errors = validate_report(results)
+    if errors:
+        print("⚠️  Schema validation errors:")
+        for error in errors:
+            print(f"  - {error}")
+        print()
+
+    try:
+        output_path = render_report_card(results, args.output, title=args.title, subtitle=args.subtitle)
+    except CardRenderError as exc:
+        print(f"❌ {exc}")
+        return 1
+
+    print(f"Report card saved to: {output_path}")
     return 0
 
 

@@ -24,6 +24,7 @@ classifiers = [
 dependencies = ["jsonschema>=4.23.0"]
 
 [project.optional-dependencies]
+card = ["Pillow>=10.0.0"]
 dev = ["pytest", "ruff"]
 
 [project.scripts]

@@ -257,6 +257,13 @@ Generate Markdown from a previous JSON report:
 hermescheck report audit_results.json -o audit_report.md
 ```
 
+Render a clean PNG report card for README, release, or social sharing:
+
+```bash
+pip install "hermescheck[card]"
+hermescheck card audit_results.json -o audit_card.png
+```
+
 Validate a report:
 
 ```bash

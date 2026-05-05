@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 def _write_project(root: Path, code: str) -> Path:
     root.mkdir(parents=True, exist_ok=True)
@@ -179,3 +181,55 @@ def test_cli_can_fail_ci_on_severity_threshold(tmp_path: Path) -> None:
     )
 
     assert proc.returncode == 1
+
+
+def test_cli_can_render_report_card_when_pillow_available(tmp_path: Path) -> None:
+    pytest.importorskip("PIL")
+    project = _write_project(
+        tmp_path / "project",
+        "import subprocess\nsubprocess.run(command, shell=True)\n",
+    )
+    json_output = tmp_path / "audit.json"
+    card_output = tmp_path / "audit_card.png"
+
+    audit_proc = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "hermescheck",
+            str(project),
+            "-o",
+            str(json_output),
+            "-r",
+            str(tmp_path / "audit.md"),
+            "--quiet",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
+        env=_cli_env(),
+    )
+
+    assert audit_proc.returncode == 0, audit_proc.stderr
+
+    card_proc = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "hermescheck",
+            "card",
+            str(json_output),
+            "-o",
+            str(card_output),
+            "--title",
+            "Demo Audit",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
+        env=_cli_env(),
+    )
+
+    assert card_proc.returncode == 0, card_proc.stdout + card_proc.stderr
+    assert card_output.exists()
+    assert card_output.read_bytes().startswith(b"\x89PNG")
