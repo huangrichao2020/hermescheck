@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.3
+
+- Add cognitive runtime governance checks for depth routing, post-turn reflection, and sidecar runtime mechanisms.
+- Add gateway timeout stale-agent cache eviction checks.
+
 ## 1.3.2
 
 - Prune large skipped directories such as `node_modules/` and `.venv/` before recursive audit traversal.
