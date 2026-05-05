@@ -36,6 +36,10 @@ developer communities.
   <!-- ALL-CONTRIBUTORS-BADGE:END -->
 </p>
 
+<p align="center">
+  <a href="./docs/releases/README.md">Release notes</a>
+</p>
+
 ## Why It Exists
 
 Hermes Agent is more than a chat CLI. It is a persistent agent runtime with a
@@ -317,6 +321,7 @@ Useful contributions include:
 
 See:
 
+- [Release notes](./docs/releases/README.md)
 - [Contribution examples](./docs/examples/contribution-examples.md)
 - [Release process](./docs/governance/release-process.md)
 - [Agent prompt](./docs/AGENT_PROMPT.md)
