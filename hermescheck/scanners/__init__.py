@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Callable, List
 
 from hermescheck.config import AuditConfig
+from hermescheck.scanners.architecture_separation import scan_architecture_separation
 from hermescheck.scanners.bug_inference import scan_bug_inference
 from hermescheck.scanners.capability_policy import scan_capability_policy
 from hermescheck.scanners.code_execution import scan_code_execution
@@ -127,6 +128,18 @@ SCANNER_REGISTRY = [
         name="Cognitive Runtime Governance",
         func=_adapt(scan_cognitive_runtime_governance),
         audited_layers=("cognitive_runtime", "active_recall", "long_term_memory"),
+    ),
+    ScannerSpec(
+        slug="architecture_separation",
+        name="Architecture Separation",
+        func=_adapt(scan_architecture_separation),
+        audited_layers=(
+            "platform_rendering",
+            "knowledge_consistency",
+            "self_evolution",
+            "persistence",
+            "completion_closure",
+        ),
     ),
     ScannerSpec(
         slug="impression_memory",
@@ -264,6 +277,7 @@ def get_enabled_scanners(config: AuditConfig) -> list[ScannerSpec]:
             "rag_pipeline_governance",
             "self_evolution_capability",
             "cognitive_runtime_governance",
+            "architecture_separation",
             "impression_memory",
             "knowledge_consistency",
             "role_play_orchestration",
@@ -295,6 +309,7 @@ __all__ = [
     "ScannerSpec",
     "SCANNER_REGISTRY",
     "get_enabled_scanners",
+    "scan_architecture_separation",
     "scan_bug_inference",
     "scan_capability_policy",
     "scan_code_execution",

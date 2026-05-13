@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.4
+
+- Add architecture-separation checks based on `how-to-agent`: output streams,
+  knowledge authority, self-evolution governance, bounded sidecars, dependency
+  hygiene, and evidence closure.
+- Include report-card rendering in the release line.
+
 ## 1.3.3
 
 - Add cognitive runtime governance checks for depth routing, post-turn reflection, and sidecar runtime mechanisms.

@@ -6,14 +6,18 @@ Hermes-shaped architecture audit tool for persistent, stateful agent runtimes.
 
 ## Unreleased on main
 
-**Report cards for audit results**
+No unreleased changes yet.
 
-- Added `hermescheck card` to render a clean PNG summary card from a JSON audit
-  report.
-- Kept Pillow optional through `hermescheck[card]`, so the core scanner remains
-  lightweight.
-- Designed the card for README images, release posts, marketplace assets, and
-  maintainer-friendly architecture snapshots.
+## [1.3.4](./hermescheck-1.3.4.md)
+
+**Architecture separation and report cards**
+
+- Added checks for long-running output stream separation, knowledge authority,
+  self-evolution governance, bounded sidecars, dependency remediation order,
+  and evidence-backed completion.
+- Folded the newest `how-to-agent` architecture lessons into the runtime audit
+  model.
+- Included `hermescheck card` in the release line for PNG audit summary cards.
 
 ## [1.3.3](./hermescheck-1.3.3.md)
 

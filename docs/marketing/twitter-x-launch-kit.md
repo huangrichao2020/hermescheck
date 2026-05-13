@@ -12,38 +12,38 @@ freshness, gateway/tool boundaries, observability, and release evidence.
 
 ## Short Post
 
-`hermescheck` 1.3.3 is out.
+`hermescheck` 1.3.4 is out.
 
-It now treats cognitive runtime mechanisms as part of agent architecture:
+It now checks the architecture separations that keep persistent agents calm:
 
-- cognitive depth routing needs visible-output boundaries
-- post-turn reflection needs memory admission governance
-- runtime sidecars need budgets and fail-soft behavior
-- gateway timeouts should evict stale cached agents
+- long Feishu/chat tasks need progress and conclusion streams
+- memory needs current facts, skills, session history, and cold archives split
+- self-evolution needs proposal, evidence, risk, validation, and rollback
+- sidecars need a primary runtime path and fail-soft boundaries
+- completion needs live evidence, not just edited files
 
-Hermes-style agents are persistent systems. `hermescheck` is evolving toward
-audits that check runtime structure, memory, and the cognitive mechanisms that
-shape each turn.
+This release folds the newest `how-to-agent` lessons into `hermescheck`, plus
+PNG report cards for sharing audit results.
 
 GitHub: https://github.com/huangrichao2020/hermescheck
 PyPI: https://pypi.org/project/hermescheck/
 
 ## Thread Draft
 
-1. `hermescheck` 1.3.3 is out. The core idea: cognitive runtime mechanisms are
-   architecture, not just prompt flavor.
+1. `hermescheck` 1.3.4 is out. The core idea: excellent agent architecture is a
+   set of explicit separations.
 
-2. This release adds checks for cognitive-depth routing, post-turn reflection
-   governance, runtime sidecar safety, and gateway timeout cache eviction.
+2. Long-running chat gateways should split progress/status output from final
+   conclusions. Editing one rich-text message forever is brittle.
 
-3. A depth router should say both how deeply to process a turn and where the
-   visible answer should stop.
+3. Memory needs authority boundaries: current facts, procedures/skills,
+   searchable session history, and cold archives are not the same layer.
 
-4. Post-turn reflection should be structured, compact, confidence-scored, and
-   reviewed before it becomes durable memory.
+4. Self-evolution needs a ratchet: proposal, evidence, risk classification,
+   validation plan, rollback plan, apply gate, and post-change audit.
 
-5. Runtime sidecars like loop detectors and context sandboxes should be
-   bounded and fail-soft, so they improve the agent without blocking the task.
+5. Sidecars should be bounded and fail-soft, dependency fixes should be ordered
+   by runtime blast radius, and completion should close with live evidence.
 
 6. Repo: https://github.com/huangrichao2020/hermescheck
    PyPI: https://pypi.org/project/hermescheck/

@@ -55,6 +55,7 @@ PERSONAL_HEALTH_BY_SEVERITY = {
     "none": "strong",
 }
 PERSONAL_SEVERITY_OVERRIDES = {
+    "architecture_separation": {"medium": "low"},
     "code_execution": {"critical": "medium", "high": "low"},
     "knowledge_consistency": {"medium": "low"},
     "llm_routing": {"high": "medium", "medium": "low"},
