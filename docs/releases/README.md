@@ -8,6 +8,18 @@ Hermes-shaped architecture audit tool for persistent, stateful agent runtimes.
 
 No unreleased changes yet.
 
+## [1.3.5](./hermescheck-1.3.5.md)
+
+**Cognitive governance admission loop**
+
+- Expanded cognitive runtime checks for Purpose/admission boundaries,
+  scheduled-report hot memory, dream admission trails, and L5 diary privacy.
+- Excluded generated audit output directories and report artifacts from scanner
+  inputs.
+- Added doctrine for the latest `how-to-agent` cognition-governance model:
+  inputs are evidence, Purpose controls attention, and admission controls
+  durability.
+
 ## [1.3.4](./hermescheck-1.3.4.md)
 
 **Architecture separation and report cards**

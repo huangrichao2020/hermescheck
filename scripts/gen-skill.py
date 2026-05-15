@@ -29,12 +29,14 @@ def read_scanner_patterns():
         desc = m.group(1).strip() if m else ""
         # Extract patterns
         pat_lines = re.findall(r're\.compile\((r?["\'](.+?)["\'])', content)
-        patterns.append({
-            "module": fp.stem.replace("_", " ").title(),
-            "file": fp.name,
-            "description": desc.split("\n")[0],
-            "regex_count": len(pat_lines),
-        })
+        patterns.append(
+            {
+                "module": fp.stem.replace("_", " ").title(),
+                "file": fp.name,
+                "description": desc.split("\n")[0],
+                "regex_count": len(pat_lines),
+            }
+        )
     return patterns
 
 
@@ -95,7 +97,7 @@ def generate_skill_md():
 
     skill = f"""---
 name: hermes-agent-health-check
-description: Audit a NousResearch/hermes-agent checkout or fork for Hermes-specific runtime-contract drift, command-surface splits, memory/skill/gateway health, and agent architecture risks. Uses the hermescheck Python library ({schema.get('properties', {}).get('schema_version', {}).get('const', 'unknown')}) for structured reports with severity-ranked findings and code-first fix plans.
+description: Audit a NousResearch/hermes-agent checkout or fork for Hermes-specific runtime-contract drift, command-surface splits, memory/skill/gateway health, and agent architecture risks. Uses the hermescheck Python library ({schema.get("properties", {}).get("schema_version", {}).get("const", "unknown")}) for structured reports with severity-ranked findings and code-first fix plans.
 origin: https://github.com/huangrichao2020/hermescheck
 ---
 

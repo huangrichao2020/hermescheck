@@ -557,6 +557,58 @@ def test_cognitive_runtime_flags_mechanism_stack_without_sidecar_safety(tmp_path
     assert "Runtime mechanism stack lacks sidecar safety policy" in _titles(findings)
 
 
+def test_cognitive_runtime_flags_governance_ladder_without_purpose_admission(tmp_path: Path) -> None:
+    (tmp_path / "cognitive_governance.md").write_text(
+        "\n".join(
+            [
+                "# Cognitive governance",
+                "Trace becomes episode, candidate claim, verified fact, transferable knowledge, procedure, identity,",
+                "nourishment, and L5 human behavior.",
+                "The cognitive store writes durable cognition updates after every channel turn.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_cognitive_runtime_governance(tmp_path)
+
+    assert "Cognitive governance lacks Purpose/admission boundary" in _titles(findings)
+
+
+def test_cognitive_runtime_flags_scheduled_reports_without_hot_memory(tmp_path: Path) -> None:
+    (tmp_path / "dream_cron.py").write_text(
+        "\n".join(
+            [
+                "def nightly_dream_cycle():",
+                "    daily_brief = build_scheduled_report()",
+                "    send_channel_report(daily_brief)",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_cognitive_runtime_governance(tmp_path)
+
+    assert "Scheduled cognition reports bypass hot memory admission" in _titles(findings)
+
+
+def test_cognitive_runtime_flags_l5_diary_without_privacy_boundary(tmp_path: Path) -> None:
+    (tmp_path / "diary.py").write_text(
+        "\n".join(
+            [
+                "def ingest_voice_diary(raw_diary):",
+                "    entry = {'L5': raw_diary, 'energy': detect_energy(raw_diary)}",
+                "    memory.write_identity(entry)",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_cognitive_runtime_governance(tmp_path)
+
+    assert "L5 diary input lacks privacy and identity boundary" in _titles(findings)
+
+
 def test_cognitive_runtime_accepts_bounded_reflection_and_sidecar_controls(tmp_path: Path) -> None:
     (tmp_path / "cognitive_layers.py").write_text(
         "\n".join(
@@ -603,6 +655,23 @@ def test_cognitive_runtime_accepts_bounded_reflection_and_sidecar_controls(tmp_p
                 "        observe_only_runtime_mechanisms()",
                 "    except Exception:",
                 "        pass  # fail soft: sidecar failure does not block main tool path",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "cognitive_governance.md").write_text(
+        "\n".join(
+            [
+                "# Cognitive governance",
+                "Purpose detection sets the goal and success criterion before data intake.",
+                "Trace, episode, candidate claim, verified fact, transferable knowledge, procedure, identity,",
+                "nourishment, and L5 human behavior are classified by an admission gate.",
+                "The cognitive_store keeps pending admission candidates with confidence, provenance, freshness,",
+                "retirement_rule, and explicit user-approved promotion into current facts or procedures.",
+                "Cron reports are written into hot channel memory as source='cron' with target_day.",
+                "Dream admission lists admitted_items and skipped_reasons for pending_cognition.",
+                "Raw diary text stays local and private by default; only admitted summaries are promoted.",
+                "One-day mood must not become permanent identity.",
             ]
         ),
         encoding="utf-8",

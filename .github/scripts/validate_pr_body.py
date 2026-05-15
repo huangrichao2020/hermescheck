@@ -84,16 +84,17 @@ def main() -> int:
         if not _checked(body, "The agent owner explicitly agreed that this contribution may be published upstream."):
             errors.append("Self-scan PRs require explicit owner consent.")
 
-        if not _checked(body, "No secrets, credentials, proprietary code dumps, customer data, or internal-only materials are included."):
+        if not _checked(
+            body,
+            "No secrets, credentials, proprietary code dumps, customer data, or internal-only materials are included.",
+        ):
             errors.append("Self-scan PRs must confirm public safety.")
 
         if not _checked(body, "Examples and evidence have been minimized and generalized for public release."):
             errors.append("Self-scan PRs must confirm evidence minimization.")
     else:
         if not _checked(body, "This PR is not based on a self-scan contribution."):
-            errors.append(
-                "Non-self-scan PRs must check 'This PR is not based on a self-scan contribution.'"
-            )
+            errors.append("Non-self-scan PRs must check 'This PR is not based on a self-scan contribution.'")
 
     for pattern in PLACEHOLDER_PATTERNS:
         if re.search(pattern, body, re.IGNORECASE):

@@ -16,6 +16,9 @@ DEFAULT_SKIP_DIRS: Set[str] = {
     "node_modules",
     "dist",
     "build",
+    "output",
+    "outputs",
+    "reports",
     "__pycache__",
     "coverage",
     "test",
@@ -40,6 +43,13 @@ DEFAULT_SKIP_DIRS: Set[str] = {
 
 # Pre-computed lowercase skip dirs for fast O(1) lookup during os.walk.
 _DEFAULT_SKIP_DIRS_LOWER: Set[str] = {s.lower() for s in DEFAULT_SKIP_DIRS}
+
+DEFAULT_SKIP_FILENAMES: Set[str] = {
+    "audit_report.md",
+    "audit_results.json",
+    "hermescheck.sarif.json",
+}
+_DEFAULT_SKIP_FILENAMES_LOWER: Set[str] = {s.lower() for s in DEFAULT_SKIP_FILENAMES}
 
 TEST_FILE_RE = re.compile(
     r"(?:^test[._-]|[._-]test$|[._-](?:test|spec)(?:[._-]|$)|(?:^|[._-])(?:fixture|fixtures)(?:[._-]|$))",
@@ -106,6 +116,8 @@ def iter_source_files(
         dirnames[:] = [d for d in dirnames if d.lower() not in skip_lower and not d.endswith(".egg-info")]
 
         for fname in filenames:
+            if fname.lower() in _DEFAULT_SKIP_FILENAMES_LOWER:
+                continue
             if exts and not fname.lower().endswith(tuple(ext.lower() for ext in exts)):
                 continue
 
@@ -147,6 +159,8 @@ def should_skip_path(path: Path, skip_dirs: set[str]) -> bool:
     lowered_parts = {part.lower() for part in path.parts}
     all_skip_dirs = _DEFAULT_SKIP_DIRS_LOWER | {skip_dir.lower() for skip_dir in skip_dirs}
     if any(skip_dir in lowered_parts for skip_dir in all_skip_dirs):
+        return True
+    if path.name.lower() in _DEFAULT_SKIP_FILENAMES_LOWER:
         return True
     if is_test_like_path(path):
         return True

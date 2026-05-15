@@ -66,7 +66,11 @@ def _validate_all_contributors(errors: list[str]) -> None:
     if not config:
         return
 
-    _require(config.get("projectOwner") == "huangrichao2020", ".all-contributorsrc projectOwner must be huangrichao2020", errors)
+    _require(
+        config.get("projectOwner") == "huangrichao2020",
+        ".all-contributorsrc projectOwner must be huangrichao2020",
+        errors,
+    )
     _require(config.get("projectName") == "hermescheck", ".all-contributorsrc projectName must be hermescheck", errors)
     _require("README.md" in config.get("files", []), ".all-contributorsrc must update README.md", errors)
     contributors = config.get("contributors", [])
@@ -117,7 +121,7 @@ def _validate_release_config(errors: list[str]) -> None:
     readme = _read("README.md")
 
     for required in (
-        'tags:',
+        "tags:",
         '"v*"',
         "softprops/action-gh-release",
         "generate_release_notes: true",

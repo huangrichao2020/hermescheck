@@ -238,6 +238,7 @@ The Hermes-specific scanner runs alongside inherited architecture checks:
 - memory lifecycle governance and CJK-safe retrieval paths
 - RAG retrieval governance and context-budget controls
 - self-evolution capability: external signals, source reading, pattern extraction, constraint adaptation, safe landing, verification closure, hands-on validation, and reusable assetization
+- cognitive governance gaps: Purpose/admission boundaries, scheduled-report hot memory, dream admission trails, and L5 diary privacy boundaries
 - architecture separation gaps: progress/conclusion streams, current facts versus archives, proposal/risk/rollback gates, core versus sidecar paths, dependency remediation order, and live evidence closure
 - impression/pointer memory gaps
 - role-play handoff chains

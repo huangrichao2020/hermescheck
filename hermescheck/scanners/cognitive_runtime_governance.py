@@ -56,6 +56,53 @@ FAIL_SOFT_RE = re.compile(
     r"(?:旁路观察|失败不影响|不拦截|静默跳过)",
     re.IGNORECASE,
 )
+GOVERNANCE_LADDER_RE = re.compile(
+    r"\b(?:cognitive[_ -]?governance|durable[_ -]?cognition|cognitive[_ -]?store|"
+    r"trace|episode|candidate[_ -]?claim|verified[_ -]?fact|transferable[_ -]?knowledge|"
+    r"procedure|identity|nourishment|L5[_ -]?(?:human|behavior|diary)|DIKWP|"
+    r"write[_ -]?once.*route[_ -]?many|attention[_ -]?gate|context[_ -]?assembly|"
+    r"feedback[_ -]?capture|durable[_ -]?cognition[_ -]?update)\b|"
+    r"(?:认知治理|持久认知|入库门禁|注意力门禁|候选声明|已验证事实|滋养|人类真实行为)",
+    re.IGNORECASE,
+)
+PURPOSE_RE = re.compile(
+    r"\b(?:purpose|purpose[_ -]?detection|goal|success[_ -]?criterion|feedback[_ -]?standard|"
+    r"why[_ -]?act|what[_ -]?counts[_ -]?as[_ -]?success)\b|(?:目的|目标|成功标准|反馈标准)",
+    re.IGNORECASE,
+)
+ADMISSION_STORE_RE = re.compile(
+    r"\b(?:admission[_ -]?(?:gate|store|control)|pending[_ -]?(?:admission|candidate)|"
+    r"promote|promotion|explicit[_ -]?(?:confirmation|consent)|provenance|freshness|"
+    r"retirement[_ -]?rule|current[_ -]?fact|user[_ -]?approved|confidence)\b|"
+    r"(?:入库|待确认|显式确认|提升|证据来源|新鲜度|退役规则|当前事实|用户批准)",
+    re.IGNORECASE,
+)
+CRON_REPORT_RE = re.compile(
+    r"\b(?:cron|scheduled[_ -]?(?:task|job|report)|daily[_ -]?brief|morning[_ -]?report|"
+    r"nightly[_ -]?(?:dream|review)|dream[_ -]?(?:admission|cycle)|channel[_ -]?report)\b|"
+    r"(?:定时任务|定时报表|日报|晨报|夜间梦境|梦境入库)",
+    re.IGNORECASE,
+)
+CRON_MEMORY_RE = re.compile(
+    r"\b(?:hot[_ -]?(?:channel[_ -]?)?memory|same[_ -]?day[_ -]?(?:memory|context)|"
+    r"source\s*=\s*[\"']cron|source['\"]?\s*:\s*[\"']cron|target[_ -]?day|"
+    r"admitted[_ -]?items|skipped[_ -]?reasons|pending[_ -]?cognition)\b|"
+    r"(?:热记忆|当天记忆|同日上下文|跳过原因|待入库认知)",
+    re.IGNORECASE,
+)
+DIARY_L5_RE = re.compile(
+    r"\b(?:L5|diary|voice[_ -]?(?:input|dictation)|lived[_ -]?day|real[_ -]?behavior|"
+    r"body[_ -]?state|energy|emotion(?:al)?[_ -]?arc|what[_ -]?happened[_ -]?today|"
+    r"raw[_ -]?diary)\b|(?:日记|语音输入|真实行为|身体状态|能量|情绪)",
+    re.IGNORECASE,
+)
+DIARY_BOUNDARY_RE = re.compile(
+    r"\b(?:raw[_ -]?(?:diary|text).*local|local[_ -]?(?:only|private)|private[_ -]?by[_ -]?default|"
+    r"admitted[_ -]?summar(?:y|ies)|approved[_ -]?summar(?:y|ies)|not.*permanent[_ -]?identity|"
+    r"must[_ -]?not.*identity|evidence[_ -]?only|one[_ -]?day[_ -]?mood)\b|"
+    r"(?:原始日记.*本地|默认私有|批准摘要|不得成为永久身份|一天情绪)",
+    re.IGNORECASE,
+)
 
 
 def _should_skip(path: Path) -> bool:
@@ -78,6 +125,13 @@ def _collect_refs(target: Path) -> dict[str, list[str]]:
             "mechanism_stack",
             "budget",
             "fail_soft",
+            "governance_ladder",
+            "purpose",
+            "admission_store",
+            "cron_report",
+            "cron_memory",
+            "diary_l5",
+            "diary_boundary",
         )
     }
     for fp in iter_source_files(target):
@@ -103,6 +157,20 @@ def _collect_refs(target: Path) -> dict[str, list[str]]:
                 refs["budget"].append(ref)
             if FAIL_SOFT_RE.search(line):
                 refs["fail_soft"].append(ref)
+            if GOVERNANCE_LADDER_RE.search(line):
+                refs["governance_ladder"].append(ref)
+            if PURPOSE_RE.search(line):
+                refs["purpose"].append(ref)
+            if ADMISSION_STORE_RE.search(line):
+                refs["admission_store"].append(ref)
+            if CRON_REPORT_RE.search(line):
+                refs["cron_report"].append(ref)
+            if CRON_MEMORY_RE.search(line):
+                refs["cron_memory"].append(ref)
+            if DIARY_L5_RE.search(line):
+                refs["diary_l5"].append(ref)
+            if DIARY_BOUNDARY_RE.search(line):
+                refs["diary_boundary"].append(ref)
     return refs
 
 
@@ -184,6 +252,108 @@ def scan_cognitive_runtime_governance(target: Path) -> List[Dict[str, Any]]:
                     "Record post-turn reflection as structured episode data with schema_version, source, session id, "
                     "confidence, importance/pain score, compact previews, and file/DB locking. Do not promote it "
                     "directly into semantic memory; let a later review or dream cycle decide."
+                ),
+            }
+        )
+
+    if refs["governance_ladder"] and (not refs["purpose"] or not refs["admission_store"]):
+        missing = []
+        if not refs["purpose"]:
+            missing.append("Purpose detection")
+        if not refs["admission_store"]:
+            missing.append("admission gate")
+        findings.append(
+            {
+                "severity": "medium",
+                "title": "Cognitive governance lacks Purpose/admission boundary",
+                "symptom": (
+                    f"Detected cognitive-governance ladder concepts, but missing {' and '.join(missing)} signals."
+                ),
+                "user_impact": (
+                    "Raw traces, episodes, claims, facts, skills, and identity rules can collapse into one memory pile, "
+                    "so stale or low-authority material may steer future behavior."
+                ),
+                "source_layer": "cognitive_runtime",
+                "mechanism": (
+                    "Repository scan for trace/episode/claim/fact/knowledge/procedure/identity/L5/DIKWP signals "
+                    "versus Purpose and admission-store controls."
+                ),
+                "root_cause": (
+                    "The runtime names cognition layers before declaring the goal that selects relevant information "
+                    "and the gate that promotes candidates into durable authority."
+                ),
+                "evidence_refs": _evidence(refs, "governance_ladder", "purpose", "admission_store"),
+                "confidence": 0.64,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Route every durable cognition update through Purpose detection, attention gating, candidate "
+                    "classification, and an admission store. Promote only explicit, sourced, fresh, useful candidates "
+                    "into facts, knowledge, procedures, identity, nourishment, or L5 summaries."
+                ),
+            }
+        )
+
+    if refs["cron_report"] and not refs["cron_memory"]:
+        findings.append(
+            {
+                "severity": "medium",
+                "title": "Scheduled cognition reports bypass hot memory admission",
+                "symptom": (
+                    "Detected cron, scheduled report, or dream-cycle signals without same-day hot memory, target-day, "
+                    "pending cognition, admitted items, or skipped-reason signals."
+                ),
+                "user_impact": (
+                    "A scheduled report may be delivered and then immediately forgotten, or a nightly dream pass may "
+                    "silently mutate durable memory without a visible admission trail."
+                ),
+                "source_layer": "cognitive_runtime",
+                "mechanism": (
+                    "Repository scan for scheduled cognition/reporting concepts versus hot-channel memory and "
+                    "dream-admission bookkeeping."
+                ),
+                "root_cause": (
+                    "Scheduled cognition appears to be treated as output rather than as same-day evidence that must "
+                    "be routed through the same admission store as interactive turns."
+                ),
+                "evidence_refs": _evidence(refs, "cron_report", "cron_memory"),
+                "confidence": 0.62,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Write cron reports into same-day hot channel memory with source='cron', task/report metadata, "
+                    "and target_day. Let dream review list admitted items and skipped reasons instead of silently "
+                    "updating durable cognition."
+                ),
+            }
+        )
+
+    if refs["diary_l5"] and not refs["diary_boundary"]:
+        findings.append(
+            {
+                "severity": "medium",
+                "title": "L5 diary input lacks privacy and identity boundary",
+                "symptom": (
+                    "Detected diary, voice-input, L5, or real-behavior signals without local/private raw-text, admitted "
+                    "summary, or non-identity-boundary language."
+                ),
+                "user_impact": (
+                    "Private lived-day material can be exported, over-generalized, or turned into permanent user "
+                    "identity from one emotional day."
+                ),
+                "source_layer": "cognitive_runtime",
+                "mechanism": (
+                    "Repository scan for L5 diary/real-behavior concepts versus privacy, summary admission, and "
+                    "identity-retirement boundaries."
+                ),
+                "root_cause": (
+                    "The runtime recognizes diary-like input but does not visibly distinguish raw private evidence "
+                    "from user-approved summaries or durable identity."
+                ),
+                "evidence_refs": _evidence(refs, "diary_l5", "diary_boundary"),
+                "confidence": 0.63,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Keep raw diary text local and private by default. Promote only user-approved summaries, and "
+                    "explicitly prevent one-day moods, failures, or impulses from becoming permanent identity."
                 ),
             }
         )

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.5
+
+- Expand cognitive runtime governance checks with Purpose/admission boundaries,
+  scheduled-report hot memory, dream admission trails, and L5 diary privacy
+  boundaries.
+- Skip generated audit output directories and report artifacts during
+  behavior-focused scans.
+- Add doctrine and release notes for the latest `how-to-agent` cognitive
+  governance lessons.
+
 ## 1.3.4
 
 - Add architecture-separation checks based on `how-to-agent`: output streams,

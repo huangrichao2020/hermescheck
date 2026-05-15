@@ -16,6 +16,7 @@ Start here:
 - [Stateful Agent](./stateful-agent.md)
 - [CLI Process Pool](./cli-process-pool.md)
 - [Completion Closure](./completion-closure.md)
+- [Cognitive Governance](./cognitive-governance.md)
 - [Impression Memory](./impression-memory.md)
 - [Target Agent Self-Review](./target-agent-self-review.md)
 - [Architecture Era Score](./maturity-score.md)

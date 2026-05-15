@@ -85,6 +85,34 @@ def test_duplicated_hashed_asset_copy_is_skipped_for_code_execution(tmp_path: Pa
     assert findings == []
 
 
+def test_generated_output_reports_are_skipped_for_code_execution(tmp_path: Path) -> None:
+    output_dir = tmp_path / "output" / "previous-audit"
+    output_dir.mkdir(parents=True)
+    (output_dir / "audit_results.json").write_text(
+        '{"finding": "Unsafe code execution: exec(", "evidence": "exec(user_input)"}\n',
+        encoding="utf-8",
+    )
+
+    findings = scan_code_execution(tmp_path)
+
+    assert findings == []
+
+
+def test_root_audit_report_artifacts_are_skipped_for_code_execution(tmp_path: Path) -> None:
+    (tmp_path / "audit_report.md").write_text(
+        "Finding says Unsafe code execution: exec(user_input)\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "audit_results.json").write_text(
+        '{"finding": "Unsafe code execution: eval("}\n',
+        encoding="utf-8",
+    )
+
+    findings = scan_code_execution(tmp_path)
+
+    assert findings == []
+
+
 def test_provider_implementation_is_not_treated_as_hidden_llm(tmp_path: Path) -> None:
     providers_dir = tmp_path / "providers"
     providers_dir.mkdir()
