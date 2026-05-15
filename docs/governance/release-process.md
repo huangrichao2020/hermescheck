@@ -70,7 +70,7 @@ Pushing a `v*` tag runs the normal CI pipeline:
 - tests on Python 3.10, 3.11, 3.12, and 3.13
 - package build
 - GitHub Release creation with generated release notes and contributors
-- PyPI publish through trusted publishing
+- PyPI publish using the configured `PYPI_API_TOKEN` secret
 
 ## What The Release Should Show
 
