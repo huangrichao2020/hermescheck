@@ -8,6 +8,20 @@ Hermes-shaped architecture audit tool for persistent, stateful agent runtimes.
 
 No unreleased changes yet.
 
+## [1.4.0](./hermescheck-1.4.0.md)
+
+**Whole-system cognitive architecture impact**
+
+- Expanded cognitive runtime checks from local memory governance to
+  whole-system architecture impact across device/OS, Rust, Python runtime,
+  sqlite/files, brain/wiki, Feishu bot, Feishu CLI, cron, dream, and learning
+  loops.
+- Added a finding for cognitive architectures that span several infrastructure
+  layers without an impact matrix, source-of-truth contract, or restart/offline
+  failure-mode review.
+- Updated release surfaces to make this a major audit-model step, not a small
+  regex patch.
+
 ## [1.3.5](./hermescheck-1.3.5.md)
 
 **Cognitive governance admission loop**

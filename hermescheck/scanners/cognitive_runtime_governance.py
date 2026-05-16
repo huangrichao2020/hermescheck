@@ -103,6 +103,45 @@ DIARY_BOUNDARY_RE = re.compile(
     r"(?:原始日记.*本地|默认私有|批准摘要|不得成为永久身份|一天情绪)",
     re.IGNORECASE,
 )
+DEVICE_OS_RE = re.compile(
+    r"\b(?:device|mac|laptop|battery|sleep|wake|offline|online|network|launchd|launchctl|systemd|"
+    r"gateway restart|process restart|reconnect)\b|(?:设备|断网|联网|睡眠|唤醒|电池|重启|重连)",
+    re.IGNORECASE,
+)
+RUST_SUBSTRATE_RE = re.compile(
+    r"\b(?:rust|rust bridge|ipc|protocol contract|substrate|ffi|sqlite helper)\b|(?:底层\s*Rust|Rust\s*底座)",
+    re.IGNORECASE,
+)
+PYTHON_RUNTIME_RE = re.compile(
+    r"\b(?:python runtime|python execution|tool dispatch|prompt assembly|scheduler|runtime prompt|context assembler)\b|"
+    r"(?:Python\s*执行层|工具调度|提示组装|上下文组装)",
+    re.IGNORECASE,
+)
+STORE_SURFACE_RE = re.compile(
+    r"\b(?:sqlite|jsonl|file store|memory store|vector store|hot memory|archive|admitted cognition|pending cognition)\b|"
+    r"(?:存储层|热记忆|归档|正式认知|待准入)",
+    re.IGNORECASE,
+)
+BRAIN_WIKI_RE = re.compile(
+    r"\b(?:brain|wiki|knowledge page|architecture manual|gbrain|second brain)\b|(?:脑|知识库|架构手册)",
+    re.IGNORECASE,
+)
+FEISHU_SURFACE_RE = re.compile(
+    r"\b(?:feishu|lark|group chat|bot reaction|message reaction|chat scope)\b|(?:飞书|群聊|表情反应)",
+    re.IGNORECASE,
+)
+FEISHU_CLI_RE = re.compile(
+    r"\b(?:feishu cli|lark-cli|document token|doc token|workspace identity|as bot|as user)\b|"
+    r"(?:飞书\s*CLI|文档\s*token|机器人身份|用户身份)",
+    re.IGNORECASE,
+)
+WHOLE_SYSTEM_CONTRACT_RE = re.compile(
+    r"\b(?:whole[-_ ]system|cross[-_ ]layer|impact matrix|impact review|source of truth|authority contract|"
+    r"infrastructure layer|affected layers|background[-_ ]loop behavior|user[-_ ]visible behavior|"
+    r"restart/offline|offline failure|restart failure|failure mode)\b|"
+    r"(?:整体架构|全局架构|跨层|影响矩阵|事实源|权威来源|基础设施层|用户可见行为|后台循环|离线失败|重启失败)",
+    re.IGNORECASE,
+)
 
 
 def _should_skip(path: Path) -> bool:
@@ -132,6 +171,14 @@ def _collect_refs(target: Path) -> dict[str, list[str]]:
             "cron_memory",
             "diary_l5",
             "diary_boundary",
+            "device_os",
+            "rust_substrate",
+            "python_runtime",
+            "store_surface",
+            "brain_wiki",
+            "feishu_surface",
+            "feishu_cli",
+            "whole_system_contract",
         )
     }
     for fp in iter_source_files(target):
@@ -171,6 +218,22 @@ def _collect_refs(target: Path) -> dict[str, list[str]]:
                 refs["diary_l5"].append(ref)
             if DIARY_BOUNDARY_RE.search(line):
                 refs["diary_boundary"].append(ref)
+            if DEVICE_OS_RE.search(line):
+                refs["device_os"].append(ref)
+            if RUST_SUBSTRATE_RE.search(line):
+                refs["rust_substrate"].append(ref)
+            if PYTHON_RUNTIME_RE.search(line):
+                refs["python_runtime"].append(ref)
+            if STORE_SURFACE_RE.search(line):
+                refs["store_surface"].append(ref)
+            if BRAIN_WIKI_RE.search(line):
+                refs["brain_wiki"].append(ref)
+            if FEISHU_SURFACE_RE.search(line):
+                refs["feishu_surface"].append(ref)
+            if FEISHU_CLI_RE.search(line):
+                refs["feishu_cli"].append(ref)
+            if WHOLE_SYSTEM_CONTRACT_RE.search(line):
+                refs["whole_system_contract"].append(ref)
     return refs
 
 
@@ -190,6 +253,17 @@ def _evidence(refs: dict[str, list[str]], *keys: str, limit: int = 10) -> list[s
 def scan_cognitive_runtime_governance(target: Path) -> List[Dict[str, Any]]:
     refs = _collect_refs(target)
     findings: List[Dict[str, Any]] = []
+    infra_keys = (
+        "device_os",
+        "rust_substrate",
+        "python_runtime",
+        "store_surface",
+        "brain_wiki",
+        "feishu_surface",
+        "feishu_cli",
+        "cron_report",
+    )
+    infra_hits = [key for key in infra_keys if refs[key]]
 
     if refs["cognitive"] and not refs["boundary"]:
         findings.append(
@@ -289,6 +363,43 @@ def scan_cognitive_runtime_governance(target: Path) -> List[Dict[str, Any]]:
                     "Route every durable cognition update through Purpose detection, attention gating, candidate "
                     "classification, and an admission store. Promote only explicit, sourced, fresh, useful candidates "
                     "into facts, knowledge, procedures, identity, nourishment, or L5 summaries."
+                ),
+            }
+        )
+
+    if (refs["governance_ladder"] or refs["cognitive"]) and len(infra_hits) >= 4 and not refs["whole_system_contract"]:
+        findings.append(
+            {
+                "severity": "medium",
+                "title": "Cognitive architecture lacks whole-system impact matrix",
+                "symptom": (
+                    "Detected cognitive architecture plus multiple infrastructure surfaces "
+                    f"({', '.join(infra_hits[:6])}), but no whole-system impact matrix, source-of-truth contract, "
+                    "or restart/offline failure-mode review."
+                ),
+                "user_impact": (
+                    "A local cognition fix may look correct in one tool or prompt while breaking continuity across "
+                    "Feishu, CLI document evidence, sqlite/wiki authority, Rust/Python boundaries, cron, dream, "
+                    "or device reconnect behavior."
+                ),
+                "source_layer": "cognitive_runtime",
+                "mechanism": (
+                    "Repository scan for cognitive-governance signals plus device/Rust/Python/store/brain/wiki/"
+                    "Feishu/CLI/cron surfaces versus whole-system impact, source-of-truth, and restart/offline "
+                    "review language."
+                ),
+                "root_cause": (
+                    "The architecture treats cognition as a local memory/runtime feature before naming the "
+                    "cross-layer system that actually carries user context and agent continuity."
+                ),
+                "evidence_refs": _evidence(refs, "governance_ladder", "cognitive", *infra_keys, limit=12),
+                "confidence": 0.66,
+                "fix_type": "architecture_change",
+                "recommended_fix": (
+                    "Add a whole-system cognitive impact matrix covering input, execution, storage, retrieval, "
+                    "cognition, evolution, and operations layers. For non-trivial changes, require affected layers, "
+                    "source-of-truth movement, user-visible behavior, background-loop behavior, and restart/offline "
+                    "failure modes before implementation."
                 ),
             }
         )

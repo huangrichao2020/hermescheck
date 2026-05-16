@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- Expand cognitive runtime governance into whole-system cognitive architecture
+  impact checks across device/OS, Rust, Python runtime, sqlite/files,
+  brain/wiki, Feishu bot, Feishu CLI, cron, dream, and learning loops.
+- Flag cognitive systems that lack an impact matrix, source-of-truth contract,
+  user-visible/background-loop review, or restart/offline failure-mode review.
+
 ## 1.3.5
 
 - Expand cognitive runtime governance checks with Purpose/admission boundaries,

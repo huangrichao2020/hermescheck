@@ -609,6 +609,29 @@ def test_cognitive_runtime_flags_l5_diary_without_privacy_boundary(tmp_path: Pat
     assert "L5 diary input lacks privacy and identity boundary" in _titles(findings)
 
 
+def test_cognitive_runtime_flags_whole_system_without_impact_matrix(tmp_path: Path) -> None:
+    (tmp_path / "cognitive_runtime.md").write_text(
+        "\n".join(
+            [
+                "# Cognitive architecture",
+                "Trace, episode, candidate claim, verified fact, transferable knowledge, procedure, identity,",
+                "nourishment, and L5 human behavior are stored as durable cognition.",
+                "Feishu group chat and bot reactions are the main input surface.",
+                "Feishu CLI fetches document tokens from the workspace.",
+                "SQLite and JSONL stores keep hot memory, archive memory, and pending cognition.",
+                "The brain/wiki pages hold architecture manuals.",
+                "A Rust bridge accelerates IPC while Python execution owns tool dispatch.",
+                "Cron and nightly dream reports update the cognition loop.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    findings = scan_cognitive_runtime_governance(tmp_path)
+
+    assert "Cognitive architecture lacks whole-system impact matrix" in _titles(findings)
+
+
 def test_cognitive_runtime_accepts_bounded_reflection_and_sidecar_controls(tmp_path: Path) -> None:
     (tmp_path / "cognitive_layers.py").write_text(
         "\n".join(
@@ -672,6 +695,12 @@ def test_cognitive_runtime_accepts_bounded_reflection_and_sidecar_controls(tmp_p
                 "Dream admission lists admitted_items and skipped_reasons for pending_cognition.",
                 "Raw diary text stays local and private by default; only admitted summaries are promoted.",
                 "One-day mood must not become permanent identity.",
+                "Whole-system cognitive architecture impact matrix names input, execution, storage, retrieval,",
+                "cognition, evolution, and operations layers.",
+                "The source of truth contract explains current message, live tool output, hot memory, admitted cognition,",
+                "wiki/brain pages, git history, device OS state, and restart/offline failure modes.",
+                "Every non-trivial change names affected layers, user-visible behavior, background-loop behavior,",
+                "and restart failure mode before implementation.",
             ]
         ),
         encoding="utf-8",
